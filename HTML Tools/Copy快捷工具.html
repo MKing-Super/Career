@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能复制输入框（10个）</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+        }
+        .container {
+            background-color: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .input-group {
+            display: flex;
+            margin-bottom: 15px;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        .input-group:hover {
+            transform: translateX(5px);
+        }
+        .input-field {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 6px 0 0 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        .input-field:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 8px rgba(52, 152, 219, 0.3);
+        }
+        .input-actions {
+            display: flex;
+        }
+        .copy-btn, .clear-btn {
+            padding: 12px 18px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .copy-btn {
+            background-color: #3498db;
+            color: white;
+            border-radius: 0;
+        }
+        .copy-btn:hover {
+            background-color: #2980b9;
+        }
+        .clear-btn {
+            background-color: #e74c3c;
+            color: white;
+            border-radius: 0 6px 6px 0;
+        }
+        .clear-btn:hover {
+            background-color: #c0392b;
+        }
+        .notification {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background-color: #2ecc71;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 6px;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            animation: fadeIn 0.3s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .instructions {
+            background-color: #eaf7fd;
+            padding: 15px 20px;
+            border-radius: 6px;
+            margin-bottom: 25px;
+            border-left: 4px solid #3498db;
+            color: #2c3e50;
+        }
+        .input-label {
+            min-width: 100px;
+            margin-right: 10px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>智能复制输入框（10个）</h1>
+        
+        <div class="instructions">
+            <p><strong>使用说明：</strong></p>
+            <ul>
+                <li>点击"复制"按钮可将有内容的输入框内容复制到剪贴板</li>
+                <li>可以直接编辑所有输入框内容</li>
+                <li>点击"清空"按钮可清空对应输入框</li>
+                <li>空内容的输入框不会执行复制操作</li>
+            </ul>
+        </div>
+        
+        <!-- 10个输入框组 -->
+        <div class="input-group">
+            <span class="input-label">输入框 1:</span>
+            <input type="text" class="input-field" placeholder="请输入内容...">
+            <div class="input-actions">
+                <button class="copy-btn">复制</button>
+                <button class="clear-btn">清空</button>
+            </div>
+        </div>
+        
+        <div class="input-group">
+            <span class="input-label">输入框 2:</span>
+            <input type="text" class="input-field" placeholder="请输入内容...">
+            <div class="input-actions">
+                <button class="copy-btn">复制</button>
+                <button class="clear-btn">清空</button>
+            </div>
+        </div>
+        
+        <div class="input-group">
+            <span class="input-label">输入框 3:</span>
+            <input type="text" class="input-field" placeholder="请输入内容...">
+            <div class="input-actions">
+                <button class="copy-btn">复制</button>
+                <button class="clear-btn">清空</button>
+            </div>
+        </div>
+        
+        <div class="input-group">
+            <span class="input-label">输入框 4:</span>
+            <input type="text" class="input-field" placeholder="请输入内容...">
+            <div class="input-actions">
+                <button class="copy-btn">复制</button>
+                <button class="clear-btn">清空</button>
+            </div>
+        </div>
+        
+        <div class="input-group">
+            <span class="input-label">输入框 5:</span>
+            <input type="text" class="input-field" placeholder="请输入内容...">
+            <div class="input-actions">
+                <button class="copy-btn">复制</button>
+                <button class="clear-btn">清空</button>
+            </div>
+        </div>
+        
+        <div class="input-group">
+            <span class="input-label">输入框 6:</span>
+            <input type="text" class="input-field" placeholder="请输入内容...">
+            <div class="input-actions">
+                <button class="copy-btn">复制</button>
+                <button class="clear-btn">清空</button>
+            </div>
+        </div>
+        
+        <div class="input-group">
+            <span class="input-label">输入框 7:</span>
+            <input type="text" class="input-field" placeholder="请输入内容...">
+            <div class="input-actions">
+                <button class="copy-btn">复制</button>
+                <button class="clear-btn">清空</button>
+            </div>
+        </div>
+        
+        <div class="input-group">
+            <span class="input-label">输入框 8:</span>
+            <input type="text" class="input-field" placeholder="请输入内容...">
+            <div class="input-actions">
+                <button class="copy-btn">复制</button>
+                <button class="clear-btn">清空</button>
+            </div>
+        </div>
+        
+        <div class="input-group">
+            <span class="input-label">输入框 9:</span>
+            <input type="text" class="input-field" placeholder="请输入内容...">
+            <div class="input-actions">
+                <button class="copy-btn">复制</button>
+                <button class="clear-btn">清空</button>
+            </div>
+        </div>
+        
+        <div class="input-group">
+            <span class="input-label">输入框 10:</span>
+            <input type="text" class="input-field" placeholder="请输入内容...">
+            <div class="input-actions">
+                <button class="copy-btn">复制</button>
+                <button class="clear-btn">清空</button>
+            </div>
+        </div>
+        
+        <div id="notification" class="notification"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const notification = document.getElementById('notification');
+            const inputGroups = document.querySelectorAll('.input-group');
+            
+            // 为每个输入框组添加事件
+            inputGroups.forEach(group => {
+                const input = group.querySelector('.input-field');
+                const copyBtn = group.querySelector('.copy-btn');
+                const clearBtn = group.querySelector('.clear-btn');
+                
+                // 复制按钮点击事件
+                copyBtn.addEventListener('click', async function() {
+                    if (input.value.trim() === '') {
+                        showNotification('输入框为空，无内容可复制', true);
+                        return;
+                    }
+                    
+                    try {
+                        await navigator.clipboard.writeText(input.value);
+                        showNotification('内容已成功复制到剪贴板！');
+                    } catch (err) {
+                        console.error('复制失败:', err);
+                        // 回退方法
+                        input.select();
+                        document.execCommand('copy');
+                        showNotification('内容已复制到剪贴板！');
+                    }
+                });
+                
+                // 清空按钮点击事件
+                clearBtn.addEventListener('click', function() {
+                    input.value = '';
+                    input.focus();
+                    showNotification('输入框已清空');
+                });
+                
+                // 输入框点击事件（可选）
+                input.addEventListener('click', function() {
+                    this.select();
+                });
+            });
+            
+            // 显示通知
+            function showNotification(message, isError = false) {
+                notification.textContent = message;
+                notification.style.backgroundColor = isError ? '#e74c3c' : '#2ecc71';
+                notification.style.display = 'block';
+                
+                setTimeout(() => {
+                    notification.style.display = 'none';
+                }, 2000);
+            }
+        });
+    </script>
+</body>
+</html>

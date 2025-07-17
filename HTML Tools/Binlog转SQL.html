@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MySQL Binlog 转 SQL 工具</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .section {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 10px 0;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #result {
+            background-color: #f9f9f9;
+            border-left: 4px solid #4CAF50;
+            padding: 10px;
+        }
+        .error {
+            color: red;
+        }
+        .info {
+            color: #31708f;
+            background-color: #d9edf7;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>MySQL Binlog 转 SQL 工具</h1>
+        
+        <div class="info">
+            <p><strong>使用说明：</strong></p>
+            <ol>
+                <li>在"表结构定义"中输入表的CREATE TABLE语句</li>
+                <li>在"Binlog内容"中输入从mysqlbinlog工具获取的原始内容</li>
+                <li>点击"转换为SQL"按钮生成可执行的SQL语句</li>
+                <li>复制结果SQL到MySQL客户端执行</li>
+            </ol>
+        </div>
+
+        <div class="section">
+            <label for="tableSchema">表结构定义 (CREATE TABLE语句):</label>
+            <textarea id="tableSchema" placeholder="例如: 
+CREATE TABLE `test` (
+  `id` int(11) DEFAULT NULL,
+  `name` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"></textarea>
+        </div>
+
+        <div class="section">
+            <label for="binlogContent">Binlog内容:</label>
+            <textarea id="binlogContent" placeholder="例如:
+### UPDATE `work`.`test`
+### WHERE
+###   @1=1 /* INT meta=0 nullable=1 is_null=0 */
+###   @2='work' /* VARSTRING(80) meta=80 nullable=1 is_null=0 */
+### SET
+###   @1=1 /* INT meta=0 nullable=1 is_null=0 */
+###   @2='change' /* VARSTRING(80) meta=80 nullable=1 is_null=0 */
+"></textarea>
+        </div>
+
+        <button id="convertBtn">转换为SQL</button>
+
+        <div class="section">
+            <label for="result">生成的SQL语句:</label>
+            <textarea id="result" readonly></textarea>
+        </div>
+    </div>
+
+    <script>
+		// #个数
+		var symbol = "##"
+	
+	
+        document.getElementById('convertBtn').addEventListener('click', function() {
+            const tableSchema = document.getElementById('tableSchema').value.trim();
+            const binlogContent = document.getElementById('binlogContent').value.trim();
+            const resultArea = document.getElementById('result');
+            
+            resultArea.value = '';
+            
+            if (!tableSchema || !binlogContent) {
+                resultArea.value = '错误: 请填写表结构定义和Binlog内容';
+                return;
+            }
+
+            try {
+                // 提取列名和类型信息
+                const columnInfo = parseTableSchema(tableSchema);
+                
+                // 解析binlog内容
+                const sqlStatements = parseBinlog(binlogContent, columnInfo);
+                
+                resultArea.value = sqlStatements.join('\n\n');
+            } catch (error) {
+                resultArea.value = '转换错误: ' + error.message;
+            }
+        });
+
+        // 解析表结构，提取列名和类型
+        function parseTableSchema(schema) {
+            const columnRegex = /`(.+?)`\s+([a-zA-Z]+)(?:\((\d+)\))?/g;
+            const columns = [];
+            let match;
+            
+            while ((match = columnRegex.exec(schema)) !== null) {
+                columns.push({
+                    name: match[1],
+                    type: match[2].toUpperCase(),
+                    length: match[3] ? parseInt(match[3]) : null
+                });
+            }
+            
+            if (columns.length === 0) {
+                throw new Error('无法从表结构中提取列信息');
+            }
+            
+            return columns;
+        }
+
+        // 解析binlog内容并生成SQL
+        function parseBinlog(content, columnInfo) {
+            const statements = [];
+            const lines = content.split('\n');
+            let currentStatement = null;
+			
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                
+                // 检测SQL操作类型
+                if (line.startsWith(symbol + '# UPDATE') || line.startsWith(symbol + '# INSERT') || line.startsWith(symbol + '# DELETE')) {
+					var temp = line.split(symbol + '# ')[1].split(' ')
+                    const operation = temp[0]
+                    const table = temp[1]
+                    currentStatement = { operation, table, where: [], set: [] };
+                }
+                // 解析WHERE条件
+                else if (line.startsWith(symbol + '# WHERE') && currentStatement) {
+                    i++; // 跳过WHERE行
+                    while (i < lines.length && lines[i].startsWith(symbol + '#   @')) {
+                        const parts = lines[i].match(/@(\d+)=(.+?)\s+\/\*.+\*\//);
+                        if (parts && parts.length >= 3) {
+                            const colIndex = parseInt(parts[1]) - 1;
+                            if (colIndex < columnInfo.length) {
+								if(parts[2].startsWith("'") && parts[2].endsWith("'") ){
+									parts[2] = parts[2].substring(1,parts[2].length-1)
+								}
+                                const value = parseValue(parts[2], columnInfo[colIndex].type);
+						
+                                currentStatement.where.push({
+                                    column: columnInfo[colIndex].name,
+                                    value: value
+                                });
+                            }
+                        }
+                        i++;
+                    }
+					i--;
+				
+                }
+                // 解析SET值
+                else if (line.startsWith(symbol + '# SET') && currentStatement) {
+                    i++; // 跳过SET行
+                    while (i < lines.length && lines[i].startsWith(symbol + '#   @')) {
+                        const parts = lines[i].match(/@(\d+)=(.+?)\s+\/\*.+\*\//);
+                        if (parts && parts.length >= 3) {
+                            const colIndex = parseInt(parts[1]) - 1;
+                            if (colIndex < columnInfo.length) {
+								if(parts[2].startsWith("'") && parts[2].endsWith("'") ){
+									parts[2] = parts[2].substring(1,parts[2].length-1)
+								}
+                                const value = parseValue(parts[2], columnInfo[colIndex].type);
+                                currentStatement.set.push({
+                                    column: columnInfo[colIndex].name,
+                                    value: value
+                                });
+                            }
+                        }
+                        i++;
+                    }
+                    
+                    // 生成SQL语句
+                    statements.push(generateSQL(currentStatement));
+                    currentStatement = null;
+                }
+            }
+            
+            return statements;
+        }
+
+        // 根据类型解析值
+        function parseValue(valueStr, type) {
+            if (valueStr === 'NULL') return 'NULL';
+            
+            // 去除类型注释
+            const value = valueStr.replace(/\s*\/\*.+\*\/$/, '');
+            
+            // 处理字符串类型
+            if (type.includes('CHAR') || type.includes('TEXT')) {
+                return `'${value.replace(/'/g, "''")}'`;
+            }
+            // 处理时间类型
+            else if (type.includes('TIME') || type.includes('DATE')) {
+                if (/^\d+$/.test(value)) {
+                    // 时间戳转换
+                    const date = new Date(parseInt(value) * 1000);
+                    return `'${date.toISOString().slice(0, 19).replace('T', ' ')}'`;
+                }
+                return `'${value}'`;
+            }
+            // 布尔值
+            else if (type === 'BOOLEAN' || type === 'BOOL') {
+                return value === '1' ? 'TRUE' : 'FALSE';
+            }
+            // 数字类型
+            else {
+                return value;
+            }
+        }
+
+        // 生成最终SQL语句
+        function generateSQL(statement) {
+            let sql = '';
+            
+            if (statement.operation === 'UPDATE') {
+                sql = `UPDATE ${statement.table} SET `;
+                sql += statement.set.map(item => `\`${item.column}\` = ${item.value}`).join(', ');
+                sql += ' WHERE ';
+                sql += statement.where.map(item => `\`${item.column}\` = ${item.value}`).join(' AND ');
+            }
+            else if (statement.operation === 'INSERT') {
+                sql = `INSERT INTO ${statement.table} (`;
+                sql += statement.set.map(item => `\`${item.column}\``).join(', ');
+                sql += ') VALUES (';
+                sql += statement.set.map(item => item.value).join(', ');
+                sql += ')';
+            }
+            else if (statement.operation === 'DELETE') {
+                sql = `DELETE FROM ${statement.table} WHERE `;
+                sql += statement.where.map(item => `\`${item.column}\` = ${item.value}`).join(' AND ');
+            }
+            
+            return sql + ';';
+        }
+    </script>
+</body>
+</html>

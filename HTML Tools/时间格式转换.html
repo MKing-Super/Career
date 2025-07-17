@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>时间戳格式化工具</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        input, button {
+            padding: 8px;
+            font-size: 16px;
+        }
+        button {
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            min-height: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>时间戳格式化工具</h1>
+        
+        <div>
+            <label for="timestamp">输入时间戳（毫秒或秒）：</label>
+            <input type="number" id="timestamp" placeholder="例如：1672531200000">
+        </div>
+        
+        <div>
+            <button onclick="formatTimestamp()">格式化</button>
+        </div>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        function formatTimestamp() {
+            const timestampInput = document.getElementById('timestamp').value;
+            const resultDiv = document.getElementById('result');
+            
+            if (!timestampInput) {
+                resultDiv.innerHTML = '请输入时间戳';
+                return;
+            }
+            
+            let timestamp = parseInt(timestampInput);
+            
+            // 检查是秒还是毫秒
+            if (timestamp.toString().length <= 10) {
+                // 假设是秒
+                timestamp *= 1000;
+            }
+            
+            const date = new Date(timestamp);
+            
+            // 检查时间戳是否有效
+            if (isNaN(date.getTime())) {
+                resultDiv.innerHTML = '无效的时间戳';
+                return;
+            }
+            
+            // 格式化选项
+            const options = {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            };
+            
+            // 格式化日期时间
+            const formattedDateTime = date.toLocaleString('zh-CN', options).replace(/\//g, '-');
+            
+            // 显示ISO格式和本地格式
+            resultDiv.innerHTML = `
+                <p><strong>本地时间格式：</strong>${formattedDateTime}</p>
+                <p><strong>ISO 格式：</strong>${date.toISOString()}</p>
+                <p><strong>时间戳（毫秒）：</strong>${timestamp}</p>
+                <p><strong>时间戳（秒）：</strong>${Math.floor(timestamp / 1000)}</p>
+            `;
+        }
+    </script>
+</body>
+</html>

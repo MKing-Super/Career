@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RGB/HEX 颜色查询工具</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+        .input-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 8px 16px;
+            margin: 0 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        #queryBtn {
+            background-color: #4CAF50;
+            color: white;
+        }
+        #queryBtn:hover {
+            background-color: #45a049;
+        }
+        #clearBtn {
+            background-color: #f44336;
+            color: white;
+        }
+        #clearBtn:hover {
+            background-color: #d32f2f;
+        }
+        #colorPreview {
+            width: 100%;
+            height: 100px;
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            text-shadow: 0 0 2px white;
+        }
+        .color-info {
+            margin: 5px 0;
+        }
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>RGB/HEX 颜色查询工具</h1>
+    <p>在 RGB 或 HEX 输入框中输入颜色值，点击查询按钮显示颜色和转换结果。</p>
+
+    <div class="input-group">
+        <label for="rgbInput">RGB 输入（如 255, 0, 0）</label>
+        <input type="text" id="rgbInput" placeholder="例如: 255, 0, 0">
+    </div>
+
+    <div class="input-group">
+        <label for="hexInput">HEX 输入（如 #FF0000）</label>
+        <input type="text" id="hexInput" placeholder="例如: #FF0000">
+    </div>
+
+    <button id="queryBtn" onclick="showColor()">查询颜色</button>
+    <button id="clearBtn" onclick="clearInput()">清空</button>
+
+    <div id="colorPreview">
+        <div class="color-info" id="colorValue">颜色预览区域</div>
+    </div>
+    <div id="errorMessage" class="error"></div>
+
+    <script>
+        function showColor() {
+            const rgbInput = document.getElementById("rgbInput").value.trim();
+            const hexInput = document.getElementById("hexInput").value.trim();
+            const colorPreview = document.getElementById("colorPreview");
+            const colorValue = document.getElementById("colorValue");
+            const errorMessage = document.getElementById("errorMessage");
+
+            // 清空错误信息
+            errorMessage.textContent = "";
+
+            // 检查是否至少输入了一个值
+            if (!rgbInput && !hexInput) {
+                errorMessage.textContent = "请在 RGB 或 HEX 输入框中输入颜色值！";
+                return;
+            }
+
+            let rgb, hex;
+
+            // 优先处理 RGB 输入
+            if (rgbInput) {
+                const rgbValues = rgbInput.split(",").map(value => parseInt(value.trim()));
+
+                if (rgbValues.length !== 3) {
+                    errorMessage.textContent = "RGB 格式错误，请输入 3 个数值（如 255, 0, 0）！";
+                    return;
+                }
+
+                const [r, g, b] = rgbValues;
+
+                if (
+                    isNaN(r) || isNaN(g) || isNaN(b) ||
+                    r < 0 || r > 255 ||
+                    g < 0 || g > 255 ||
+                    b < 0 || b > 255
+                ) {
+                    errorMessage.textContent = "RGB 数值必须在 0-255 之间！";
+                    return;
+                }
+
+                rgb = { r, g, b };
+                hex = rgbToHex(r, g, b);
+
+                // 同步 HEX 输入框（可选）
+                document.getElementById("hexInput").value = hex;
+            } 
+            // 处理 HEX 输入
+            else if (hexInput) {
+                if (!/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(hexInput)) {
+                    errorMessage.textContent = "HEX 格式错误，请输入如 #FF0000 或 #F00！";
+                    return;
+                }
+
+                hex = hexInput;
+                rgb = hexToRgb(hex);
+
+                // 同步 RGB 输入框（可选）
+                document.getElementById("rgbInput").value = `${rgb.r}, ${rgb.g}, ${rgb.b}`;
+            }
+
+            // 显示颜色和信息
+            colorPreview.style.backgroundColor = hex;
+            colorValue.textContent = `RGB(${rgb.r}, ${rgb.g}, ${rgb.b}) | HEX(${hex})`;
+
+            // 自动调整文字颜色（深色背景用白色文字，浅色背景用黑色文字）
+            const brightness = (rgb.r * 299 + rgb.g * 587 + rgb.b * 114) / 1000;
+            colorValue.style.color = brightness > 128 ? "black" : "white";
+        }
+
+        // RGB 转 HEX
+        function rgbToHex(r, g, b) {
+            return "#" + [r, g, b].map(x => {
+                const hex = x.toString(16);
+                return hex.length === 1 ? "0" + hex : hex;
+            }).join("");
+        }
+
+        // HEX 转 RGB
+        function hexToRgb(hex) {
+            // 处理缩写形式（如 #F00）
+            if (hex.length === 4) {
+                hex = "#" + hex[1] + hex[1] + hex[2] + hex[2] + hex[3] + hex[3];
+            }
+
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : null;
+        }
+
+        function clearInput() {
+            document.getElementById("rgbInput").value = "";
+            document.getElementById("hexInput").value = "";
+            document.getElementById("colorPreview").style.backgroundColor = "transparent";
+            document.getElementById("colorValue").textContent = "颜色预览区域";
+            document.getElementById("errorMessage").textContent = "";
+        }
+    </script>
+</body>
+</html>

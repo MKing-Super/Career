@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL语句美化工具</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: monospace;
+            tab-size: 4;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            display: block;
+            margin: 0 auto;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .options {
+            margin: 15px 0;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>SQL语句美化工具</h1>
+        
+        <div>
+            <h3>输入SQL语句：</h3>
+            <textarea id="sqlInput" placeholder="在此输入需要美化的SQL语句..."></textarea>
+        </div>
+        
+        <div class="options">
+            <label>
+                缩进大小：
+                <select id="indentSize">
+                    <option value="2">2空格</option>
+                    <option value="4" selected>4空格</option>
+                    <option value="tab">Tab</option>
+                </select>
+            </label>
+            <label>
+                <input type="checkbox" id="uppercaseKeywords" checked>
+                关键字大写
+            </label>
+        </div>
+        
+        <button id="beautifyBtn">美化SQL</button>
+        
+        <div>
+            <h3>美化结果（可复制）：</h3>
+            <textarea id="sqlOutput" readonly placeholder="美化后的SQL语句将显示在这里..."></textarea>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('beautifyBtn').addEventListener('click', function() {
+            const input = document.getElementById('sqlInput').value.trim();
+            if (!input) {
+                alert('请输入SQL语句');
+                return;
+            }
+            
+            const indentSize = document.getElementById('indentSize').value;
+            const uppercase = document.getElementById('uppercaseKeywords').checked;
+            
+            const beautified = beautifySQL(input, indentSize, uppercase);
+            document.getElementById('sqlOutput').value = beautified;
+        });
+        
+        function beautifySQL(sql, indentSize = '4', uppercase = true) {
+            const indent = indentSize === 'tab' ? '\t' : ' '.repeat(parseInt(indentSize));
+            
+            // 预处理：统一换行符和去除多余空格
+            let processedSQL = sql.replace(/\r?\n/g, ' ')
+                                 .replace(/\s+/g, ' ')
+                                 .trim();
+            
+            // 关键字大写
+            if (uppercase) {
+                const keywords = ['select', 'from', 'where', 'and', 'or', 'join', 'left join', 
+                                'right join', 'inner join', 'group by', 'order by', 'having', 
+                                'limit', 'insert into', 'values', 'update', 'set', 'delete from',
+                                'create table', 'alter table', 'drop table', 'begin', 'commit',
+                                'rollback', 'transaction', 'case', 'when', 'else', 'end', 'if',
+                                'then', 'elseif', 'end if', 'while', 'for', 'loop', 'exit', 'leave'];
+                
+                keywords.forEach(keyword => {
+                    const regex = new RegExp(`\\b${keyword}\\b`, 'gi');
+                    processedSQL = processedSQL.replace(regex, match => match.toUpperCase());
+                });
+            }
+            
+            // 分词
+            const tokens = tokenizeSQL(processedSQL);
+
+            var str = '';
+            for (let i = 0; i < tokens.length; i++) {
+                const afterArray = ['select', 'from', 'where', 'and', 'or', 'join', 'left join',
+                    'right join', 'inner join', 'group by', 'order by', 'having',
+                    'limit', 'insert into', 'values', 'update', 'set', 'delete from',
+                    'create table', 'alter table', 'drop table', 'begin', 'commit',
+                    'rollback', 'transaction', 'case', 'when', 'else', 'end', 'if',
+                    'then', 'elseif', 'end if', 'while', 'for', 'loop', 'exit', 'leave'];
+
+
+                const currArray = ['select', 'from', 'where', 'and', 'or', 'join', 'left join',
+                    'right join', 'inner join', 'group by', 'order by', 'having',
+                    'limit', 'insert into', 'values', 'update', 'set', 'delete from',
+                    'create table', 'alter table', 'drop table', 'begin', 'commit',
+                    'rollback', 'transaction', 'case', 'when', 'else', 'end', 'if',
+                    'then', 'elseif', 'end if', 'while', 'for', 'loop', 'exit', 'leave'];
+                const nextArray = ['join'];
+                var curr = tokens[i]
+                var next = tokens[i+1]
+
+                var c = currArray.some(keyword =>
+                    keyword.toLowerCase() === curr.toLowerCase()
+                );
+                if (c){
+                    str = str + '\n' + curr + '\n'
+                }else {
+                    str = str + ' ' + curr
+                }
+
+            }
+            console.log(str)
+
+            
+            // 格式化
+            let result = [];
+            let currentIndent = 0;
+            let buffer = '';
+            let prevToken = '';
+            
+            tokens.forEach(token => {
+			    //mk
+                // 逗号换行
+                if (commaAddNewline(prevToken)){
+                    if (buffer) result.push(indent.repeat(currentIndent) + buffer);
+                    buffer = '';
+                }
+                // and换行
+                else if (andAddNewline(token)){
+                    if (buffer) result.push(indent.repeat(currentIndent) + buffer);
+                    buffer = '';
+                }
+                // 处理缩进增加的情况
+                else if (shouldIncreaseIndent(prevToken, token)) {
+                    if (buffer) result.push(indent.repeat(currentIndent) + buffer);
+                    buffer = '';
+                    currentIndent++;
+                }
+                // 处理缩进减少的情况
+                else if (shouldDecreaseIndent(prevToken, token)) {
+                    if (buffer) result.push(indent.repeat(currentIndent) + buffer);
+                    buffer = '';
+                    currentIndent = Math.max(0, currentIndent - 1);
+                }
+                // 处理需要换行的情况
+                else if (shouldAddNewline(prevToken, token)) {
+                    if (buffer) result.push(indent.repeat(currentIndent) + buffer);
+                    buffer = '';
+                }
+                // 处理需要添加空格的情况
+                else if (shouldAddSpace(prevToken, token) && buffer) {
+                    buffer += ' ';
+                }
+                
+                buffer += token;
+                prevToken = token;
+            });
+            
+            if (buffer) {
+                result.push(indent.repeat(currentIndent) + buffer);
+            }
+            
+            return result.join('\n');
+        }
+        
+        function tokenizeSQL(sql) {
+            const tokens = [];
+            const specialChars = ['(', ')', ',', ';'];
+            const operators = ['=', '!=', '<>', '<', '>', '<=', '>=', '+', '-', '*', '/'];
+            let currentToken = '';
+            let inString = false;
+            let stringChar = '';
+            
+            for (let i = 0; i < sql.length; i++) {
+                const char = sql[i];
+                
+                // 处理字符串
+                if (!inString && (char === "'" || char === '"')) {
+                    if (currentToken) tokens.push(currentToken);
+                    inString = true;
+                    stringChar = char;
+                    currentToken = char;
+                } 
+                else if (inString && char === stringChar && sql[i-1] !== '\\') {
+                    currentToken += char;
+                    tokens.push(currentToken);
+                    currentToken = '';
+                    inString = false;
+                }
+                else if (inString) {
+                    currentToken += char;
+                }
+                // 处理特殊字符和操作符
+                else if (specialChars.includes(char) || operators.some(op => op.includes(char))) {
+                    if (currentToken) tokens.push(currentToken);
+                    
+                    // 处理多字符操作符
+                    if (char === '=' || char === '!' || char === '<' || char === '>') {
+                        let op = char;
+                        if (i + 1 < sql.length && operators.includes(char + sql[i+1])) {
+                            op += sql[++i];
+                        }
+                        tokens.push(op);
+                    } else {
+                        tokens.push(char);
+                    }
+                    
+                    currentToken = '';
+                }
+                // 处理空格
+                else if (char === ' ') {
+                    if (currentToken) tokens.push(currentToken);
+                    currentToken = '';
+                }
+                // 普通字符
+                else {
+                    currentToken += char;
+                }
+            }
+            
+            if (currentToken) tokens.push(currentToken);
+
+            const finalTokens = [];
+            for (let i = 0; i < tokens.length; i++) {
+                const currArray = ['left', 'right', 'inner'];
+                const nextArray = ['join'];
+                var curr = tokens[i]
+                var next = tokens[i+1]
+                var c = currArray.some(keyword =>
+                    keyword.toLowerCase() === curr.toLowerCase()
+                );
+                var n = false
+                if (next !== undefined){
+                     n = nextArray.some(keyword =>
+                        keyword.toLowerCase() === next.toLowerCase()
+                    );
+                }
+
+                if (c && n){
+                    finalTokens.push(curr + ' ' + next)
+                    i = i+1
+                }else {
+                    finalTokens.push(curr)
+                }
+            }
+            return finalTokens;
+        }
+        
+        function shouldIncreaseIndent(prevToken, currentToken) {
+            const increaseAfter = ['(', 'begin', 'case', 'when', 'else'];
+            return prevToken && currentToken && 
+                   (increaseAfter.includes(prevToken.toLowerCase()) || 
+                    (prevToken === '(' && currentToken !== ')'));
+        }
+        
+        function shouldDecreaseIndent(prevToken, currentToken) {
+            const decreaseAfter = [')', 'end', 'else', 'end case', 'end if'];
+            return prevToken && currentToken && 
+                   decreaseAfter.includes(currentToken.toLowerCase());
+        }
+        
+        function shouldAddNewline(prevToken, currentToken) {
+            const newLineAfter = [';', ')', 'begin', 'end', 'case', 'when', 'else', 
+                                'from', 'where', 'group by', 'having', 'order by', 
+                                'limit', 'join', 'left join', 'right join', 'inner join',
+                                'union'];
+            return prevToken && currentToken && 
+                   newLineAfter.some(keyword => 
+                       keyword.toLowerCase() === currentToken.toLowerCase() ||
+                       keyword.toLowerCase() === prevToken.toLowerCase()
+                   );
+        }
+        
+        function shouldAddSpace(prevToken, currentToken) {
+            if (!prevToken || !currentToken) return false;
+            
+            // 这些情况不需要空格
+            const noSpaceNeeded = [
+                ['(', ')'], [')', '('], [',', '('], ['.', '*'], 
+                ['=', '='], ['!', '='], ['<', '>'], ['<', '='], ['>', '=']
+            ];
+            
+            for (const pair of noSpaceNeeded) {
+                if (pair[0] === prevToken && pair[1] === currentToken) return false;
+                if (pair[1] === prevToken && pair[0] === currentToken) return false;
+            }
+            
+            return true;
+        }
+
+        function commaAddNewline(prevToken) {
+            const newLineAfter = [',', 'select'];
+            return prevToken &&
+                newLineAfter.some(keyword =>
+                    keyword.toLowerCase() === prevToken.toLowerCase()
+                );
+        }
+
+        function andAddNewline( currentToken) {
+            const newLineAfter = ['and'];
+            return currentToken &&
+                newLineAfter.some(keyword =>
+                    keyword.toLowerCase() === currentToken.toLowerCase()
+                );
+        }
+
+        function variousJoinAddNewline( currentToken) {
+            const newLineAfter = ['join', 'left join', 'right join', 'inner join'];
+            return currentToken &&
+                newLineAfter.some(keyword =>
+                    keyword.toLowerCase() === currentToken.toLowerCase()
+                );
+        }
+    </script>
+</body>
+</html>

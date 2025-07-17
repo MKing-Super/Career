@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON 格式化工具</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .input-area, .output-area {
+            margin-bottom: 20px;
+        }
+        textarea {
+            width: 100%;
+            height: 200px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: monospace;
+            resize: vertical;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
+        .copy-btn {
+            background-color: #2196F3;
+        }
+        .copy-btn:hover {
+            background-color: #0b7dda;
+        }
+        .controls {
+            margin: 15px 0;
+        }
+        .json-output {
+            background-color: #f8f8f8;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: monospace;
+            tab-size: 2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>JSON 格式化工具</h1>
+        
+        <div class="input-area">
+            <h3>输入 JSON 字符串:</h3>
+            <textarea id="json-input" placeholder='请输入 JSON 字符串，例如: {"name":"John","age":30,"city":"New York"}'></textarea>
+        </div>
+        
+        <div class="controls">
+            <button id="format-btn">格式化</button>
+            <button id="minify-btn">压缩</button>
+            <button id="copy-btn" class="copy-btn">复制结果</button>
+        </div>
+        
+        <div id="error-message" class="error"></div>
+        
+        <div class="output-area">
+            <h3>格式化结果:</h3>
+            <div id="json-output" class="json-output"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const formatBtn = document.getElementById('format-btn');
+            const minifyBtn = document.getElementById('minify-btn');
+            const copyBtn = document.getElementById('copy-btn');
+            const jsonInput = document.getElementById('json-input');
+            const jsonOutput = document.getElementById('json-output');
+            const errorMessage = document.getElementById('error-message');
+            
+            // 格式化按钮点击事件
+            formatBtn.addEventListener('click', function() {
+                formatJson(false);
+            });
+            
+            // 压缩按钮点击事件
+            minifyBtn.addEventListener('click', function() {
+                formatJson(true);
+            });
+            
+            // 复制按钮点击事件
+            copyBtn.addEventListener('click', function() {
+                const outputText = jsonOutput.textContent;
+                if (outputText) {
+                    navigator.clipboard.writeText(outputText)
+                        .then(() => {
+                            alert('已复制到剪贴板!');
+                        })
+                        .catch(err => {
+                            console.error('复制失败: ', err);
+                            errorMessage.textContent = '复制失败: ' + err;
+                        });
+                }
+            });
+            
+            // 格式化JSON函数
+            function formatJson(minify) {
+                errorMessage.textContent = '';
+                try {
+                    const jsonStr = jsonInput.value.trim();
+                    if (!jsonStr) {
+                        throw new Error('请输入JSON字符串');
+                    }
+                    
+                    const jsonObj = JSON.parse(jsonStr);
+                    let formattedJson;
+                    
+                    if (minify) {
+                        formattedJson = JSON.stringify(jsonObj);
+                    } else {
+                        formattedJson = JSON.stringify(jsonObj, null, 4);
+                    }
+                    
+                    jsonOutput.textContent = formattedJson;
+                } catch (e) {
+                    errorMessage.textContent = '错误: ' + e.message;
+                    jsonOutput.textContent = '';
+                }
+            }
+            
+            // 添加键盘快捷键 (Ctrl+Enter 格式化, Ctrl+Shift+Enter 压缩)
+            jsonInput.addEventListener('keydown', function(e) {
+                if (e.ctrlKey && e.key === 'Enter') {
+                    if (e.shiftKey) {
+                        formatJson(true); // 压缩
+                    } else {
+                        formatJson(false); // 格式化
+                    }
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
