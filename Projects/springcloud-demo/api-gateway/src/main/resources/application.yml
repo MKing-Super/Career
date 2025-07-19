@@ -13,7 +13,36 @@ spring:
             - Path=/work-service/**
           filters:
             - StripPrefix=1
-        # 其他服务路由配置类似...
+        - id: work-admin
+          uri: lb://work-admin
+          predicates:
+            - Path=/work-admin/**
+          filters:
+            - StripPrefix=1
+        - id: life-service
+          uri: lb://life-service
+          predicates:
+            - Path=/life-service/**
+          filters:
+            - StripPrefix=1
+        - id: life-admin
+          uri: lb://life-admin
+          predicates:
+            - Path=/life-admin/**
+          filters:
+            - StripPrefix=1
+        - id: home-service
+          uri: lb://home-service
+          predicates:
+            - Path=/home-service/**
+          filters:
+            - StripPrefix=1
+        - id: home-admin
+          uri: lb://home-admin
+          predicates:
+            - Path=/home-admin/**
+          filters:
+            - StripPrefix=1
 
 eureka:
   client:

@@ -18,7 +18,7 @@
     <properties>
         <java.version>1.8</java.version>
         <spring-cloud.version>Hoxton.SR12</spring-cloud.version>
-        <mysql.version>8.0.23</mysql.version>
+        <mysql.version>5.1.49</mysql.version> <!-- MySQL 5.7兼容版本 -->
         <mybatis-spring-boot.version>2.1.4</mybatis-spring-boot.version>
     </properties>
 
@@ -38,10 +38,6 @@
         <module>eureka-server</module>
         <module>api-gateway</module>
         <module>work-service</module>
-        <module>work-admin</module>
-        <module>life-service</module>
-        <module>life-admin</module>
-        <module>home-service</module>
-        <module>home-admin</module>
+
     </modules>
 </project>
