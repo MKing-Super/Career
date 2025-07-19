@@ -12,8 +12,8 @@ spring:
     initialization-mode: always
     platform: mysql
     # 初始化脚本
-    schema: classpath:schema-work.sql
-    data: classpath:data-work.sql
+    #schema: classpath:schema-work.sql
+    #data: classpath:data-work.sql
 
 eureka:
   client:

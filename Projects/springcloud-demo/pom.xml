@@ -38,6 +38,8 @@
         <module>eureka-server</module>
         <module>api-gateway</module>
         <module>work-service</module>
+        <module>work-admin</module>
+        <module>work-api</module>
 
     </modules>
 </project>
