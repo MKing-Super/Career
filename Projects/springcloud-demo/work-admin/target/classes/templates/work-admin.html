@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Work Admin</title>
+</head>
+<body>
+<h1>Work Management</h1>
+
+<table border="1">
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Description</th>
+        <th>Create Time</th>
+    </tr>
+    <tr th:each="work : ${works}">
+        <td th:text="${work.id}"></td>
+        <td th:text="${work.name}"></td>
+        <td th:text="${work.description}"></td>
+        <td th:text="${#dates.format(work.createTime, 'yyyy-MM-dd HH:mm')}"></td>
+    </tr>
+</table>
+
+<h2>Add New Work</h2>
+<form th:action="@{/admin/work/add}" th:object="${newWork}" method="post">
+    <div>
+        <label>Name: </label>
+        <input type="text" th:field="*{name}" required>
+    </div>
+    <div>
+        <label>Description: </label>
+        <input type="text" th:field="*{description}">
+    </div>
+    <button type="submit">Add Work</button>
+</form>
+</body>
+</html>
