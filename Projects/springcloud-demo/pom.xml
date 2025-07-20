@@ -43,6 +43,8 @@
         <module>life-service</module>
         <module>life-api</module>
         <module>life-admin</module>
-
+        <module>home-service</module>
+        <module>home-admin</module>
+        <module>home-api</module>
     </modules>
 </project>
