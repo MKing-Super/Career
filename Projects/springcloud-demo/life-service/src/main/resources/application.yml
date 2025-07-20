@@ -1,12 +1,12 @@
 server:
-  port: 8081
+  port: 8083
 
 spring:
   application:
-    name: work-service
+    name: life-service
   datasource:
-    url: jdbc:mysql://192.168.1.6:3306/work?useSSL=false&characterEncoding=utf8
-    username: mk_work
+    url: jdbc:mysql://192.168.1.7:3306/life?useSSL=false&characterEncoding=utf8
+    username: mk_life
     password: 123
     driver-class-name: com.mysql.jdbc.Driver
     initialization-mode: always

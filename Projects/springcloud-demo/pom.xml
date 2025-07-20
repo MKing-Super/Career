@@ -40,6 +40,9 @@
         <module>work-service</module>
         <module>work-admin</module>
         <module>work-api</module>
+        <module>life-service</module>
+        <module>life-api</module>
+        <module>life-admin</module>
 
     </modules>
 </project>
