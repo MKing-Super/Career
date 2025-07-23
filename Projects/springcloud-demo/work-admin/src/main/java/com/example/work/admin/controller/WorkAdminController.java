@@ -8,6 +8,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.util.Date;
 
 @Controller
 @RequestMapping("/admin/work")
@@ -26,5 +29,12 @@ public class WorkAdminController {
     public String addWork(Work work) {
         workServiceFeign.addWork(work);
         return "redirect:/admin/work";
+    }
+
+    @GetMapping("/test")
+    @ResponseBody
+    public String test(){
+        Date date = new Date();
+        return date.toString();
     }
 }
