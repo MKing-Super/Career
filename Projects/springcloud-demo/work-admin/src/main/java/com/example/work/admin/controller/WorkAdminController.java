@@ -2,6 +2,7 @@ package com.example.work.admin.controller;
 
 import com.example.work.admin.feign.WorkServiceFeign;
 import com.example.work.model.Work;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.Date;
 
+@Slf4j
 @Controller
 @RequestMapping("/admin/work")
 public class WorkAdminController {
@@ -31,10 +33,17 @@ public class WorkAdminController {
         return "redirect:/admin/work";
     }
 
-    @GetMapping("/test")
+    @GetMapping("/getTest")
     @ResponseBody
-    public String test(){
+    public String getTest(){
         Date date = new Date();
-        return date.toString();
+        return workServiceFeign.getTest("getTest");
+    }
+
+    @GetMapping("/postTest")
+    @ResponseBody
+    public String postTest(){
+        Date date = new Date();
+        return workServiceFeign.postTest("postTest");
     }
 }
