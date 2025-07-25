@@ -13,3 +13,12 @@ eureka:
   client:
     service-url:
       defaultZone: http://localhost:9100/eureka/
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info  # 暴露健康检查端点
+  endpoint:
+    health:
+      show-details: always    # 显示详细信息

@@ -23,3 +23,12 @@ eureka:
 mybatis:
   mapper-locations: classpath:mapper/*.xml
   type-aliases-package: com.example.work.model
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info  # 暴露健康检查端点
+  endpoint:
+    health:
+      show-details: always    # 显示详细信息
