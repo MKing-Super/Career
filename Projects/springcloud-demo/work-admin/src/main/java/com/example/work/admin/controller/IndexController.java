@@ -16,6 +16,7 @@ public class IndexController {
     @Autowired
     private WorkServiceFeign workServiceFeign;
 
+    @GetMapping
     @ResponseBody
     public String postTest(){
         return workServiceFeign.postTest("I am work-admin~");
