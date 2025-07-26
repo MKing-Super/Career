@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
-@FeignClient(name = "work-service")
+@FeignClient(name = "home-service",path = "/home")
 public interface HomeServiceFeign {
     @GetMapping("/work")
     List<Home> getAllWorks();
