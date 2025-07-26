@@ -18,8 +18,8 @@ public class IndexController {
 
     @GetMapping
     @ResponseBody
-    public String postTest(){
-        return workServiceFeign.postTest("I am work-admin~");
+    public String index(){
+        return workServiceFeign.getTest("I am work-admin~");
     }
 
 }
