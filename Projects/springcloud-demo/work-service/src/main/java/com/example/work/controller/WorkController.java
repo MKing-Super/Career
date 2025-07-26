@@ -26,7 +26,8 @@ public class WorkController {
 
     @PostMapping("/getTest")
     public String getTest(@RequestParam("param") String param){
-        return "It is work-service~\nparam=" + param;
+        String res = param + "\nCall!\n" + "It is work-service~";
+        return res;
     }
 
     @PostMapping("/postTest")
