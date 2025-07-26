@@ -22,4 +22,11 @@ public class HomeController {
     public void addWork(@RequestBody Home work) {
         workService.addWork(work);
     }
+
+    @GetMapping("/getTest")
+    String getTest(@RequestParam("param") String param){
+        String res = param + "\nCall!\n" + "It is home-service~";
+        return res;
+    }
+
 }
