@@ -1,6 +1,6 @@
-package com.example.home.admin.feign;
+package com.example.home.admin.feign.work;
 
-import com.example.home.model.Home;
+import com.example.work.model.Work;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -9,15 +9,18 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
-@FeignClient(name = "home-service",path = "/home")
-public interface HomeServiceFeign {
+@FeignClient(name = "work-service",path = "/work")
+public interface WorkServiceFeign {
     @GetMapping("/work")
-    List<Home> getAllWorks();
+    List<Work> getAllWorks();
 
     @PostMapping("/work")
-    void addWork(@RequestBody Home work);
+    void addWork(@RequestBody Work work);
 
-    @GetMapping("/getTest")
+    @PostMapping("/getTest")
     String getTest(@RequestParam("param") String param);
+
+    @PostMapping("/postTest")
+    String postTest(@RequestBody String param);
 
 }

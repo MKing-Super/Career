@@ -1,6 +1,6 @@
 package com.example.home.admin.controller;
 
-import com.example.home.admin.feign.HomeServiceFeign;
+import com.example.home.admin.feign.home.HomeServiceFeign;
 import com.example.home.model.Home;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;

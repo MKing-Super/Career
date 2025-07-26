@@ -40,10 +40,16 @@
             <optional>true</optional>
         </dependency>
 
-        <!-- work-service/pom.xml -->
+        <!-- home-api/pom.xml -->
         <dependency>
             <groupId>com.example</groupId>
             <artifactId>home-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- work-api/pom.xml -->
+        <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>work-api</artifactId>
             <version>${project.version}</version>
         </dependency>
 
