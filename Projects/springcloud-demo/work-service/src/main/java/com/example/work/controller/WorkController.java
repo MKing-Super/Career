@@ -1,5 +1,6 @@
 package com.example.work.controller;
 
+import cn.hutool.core.net.NetUtil;
 import com.example.work.model.Work;
 import com.example.work.service.WorkService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,8 @@ public class WorkController {
 
     @PostMapping("/getTest")
     public String getTest(@RequestParam("param") String param){
-        String res = param + "\nCall!\n" + "It is work-service~";
+        String localhostStr = NetUtil.getLocalhostStr();
+        String res = param + " -> " + "work-service["+localhostStr+"]>>>>>>>>>>";
         return res;
     }
 

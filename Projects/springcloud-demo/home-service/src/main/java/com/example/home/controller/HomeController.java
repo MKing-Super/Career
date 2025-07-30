@@ -1,5 +1,6 @@
 package com.example.home.controller;
 
+import cn.hutool.core.net.NetUtil;
 import com.example.home.model.Home;
 import com.example.home.service.HomeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +26,8 @@ public class HomeController {
 
     @GetMapping("/getTest")
     String getTest(@RequestParam("param") String param){
-        String res = param + "\nCall!\n" + "It is home-service~";
+        String localhostStr = NetUtil.getLocalhostStr();
+        String res = param + " -> " + "home-service["+localhostStr+"]~~~~~~~~~";
         return res;
     }
 
