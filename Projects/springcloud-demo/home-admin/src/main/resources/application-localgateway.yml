@@ -1,0 +1,17 @@
+server:
+  port: 80
+
+# 强制所有请求走本地Gateway
+ribbon:
+  eureka:
+    enabled: false  # 禁用Ribbon的Eureka集成
+  listOfServers: http://localhost:9200  # 固定指向本地Gateway
+
+# Feign客户端配置（无需修改代码）
+feign:
+  client:
+    config:
+      default:
+        path: /remote  # 默认走远程路由
+      home-service:
+        path: /local/home-service  # 特殊路径走本地

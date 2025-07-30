@@ -1,0 +1,18 @@
+server:
+  port: 9005
+
+# 禁用服务注册
+eureka:
+  client:
+    enabled: false
+
+spring:
+  application:
+    name: home-service
+  datasource:
+    url: jdbc:mysql://localhost:3306/home?useSSL=false&characterEncoding=utf8
+    username: root
+    password: 123
+    driver-class-name: com.mysql.jdbc.Driver
+    initialization-mode: always
+    platform: mysql

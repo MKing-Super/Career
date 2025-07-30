@@ -1,6 +1,8 @@
 spring:
   profiles:
     active: dev
+    #active: local
+    #active: localgateway
 
 mybatis:
   mapper-locations: classpath:mapper/*.xml

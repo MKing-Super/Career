@@ -2,25 +2,26 @@ server:
   port: 9200
 
 spring:
-  application:
-    name: api-gateway
   cloud:
     gateway:
       routes:
-        - id: home-service
+        # 路由规则1：本地home-service（直接URL）
+        - id: local-home-service
           uri: http://localhost:9005
           predicates:
-            - Path=/home-service/**
+            - Path=/local/home-service/**
           filters:
-            - StripPrefix=1
-        - id: home-admin
-          uri: http://localhost:80
-          predicates:
-            - Path=/home-admin/**
-          filters:
-            - StripPrefix=1
+            - StripPrefix=2  # 移除/local/home-service前缀
 
+        # 路由规则2：远程服务（通过Eureka）
+        - id: remote-services
+          uri: lb://service-id  # 使用服务发现
+          predicates:
+            - Path=/remote/**
+
+# 连接远程Eureka（但不注册自己）
 eureka:
   client:
     service-url:
-      defaultZone: http://192.168.1.9:9100/eureka/
+      defaultZone: http://192.168.1.9:9100/eureka
+    register-with-eureka: false  # 关键！不注册本地Gateway
