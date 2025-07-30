@@ -5,9 +5,9 @@ spring:
   application:
     name: home-service
   datasource:
-    url: jdbc:mysql://192.168.1.8:3306/home?useSSL=false&characterEncoding=utf8
-    username: mk_home
-    password: 111111
+    url: jdbc:mysql://localhost:3306/home?useSSL=false&characterEncoding=utf8
+    username: root
+    password: 123
     driver-class-name: com.mysql.jdbc.Driver
     initialization-mode: always
     platform: mysql

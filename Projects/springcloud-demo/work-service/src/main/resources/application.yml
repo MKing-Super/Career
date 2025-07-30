@@ -5,8 +5,8 @@ spring:
   application:
     name: work-service
   datasource:
-    url: jdbc:mysql://192.168.1.6:3306/work?useSSL=false&characterEncoding=utf8
-    username: mk_work
+    url: jdbc:mysql://localhost:3306/work?useSSL=false&characterEncoding=utf8
+    username: root
     password: 123
     driver-class-name: com.mysql.jdbc.Driver
     initialization-mode: always
