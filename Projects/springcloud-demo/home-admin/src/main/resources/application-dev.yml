@@ -1,0 +1,15 @@
+server:
+  port: 9006
+
+spring:
+  application:
+    name: home-admin
+  thymeleaf:
+    cache: false
+    prefix: classpath:/templates/
+    suffix: .html
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:9100/eureka/

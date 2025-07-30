@@ -1,0 +1,31 @@
+server:
+  port: 80
+
+spring:
+  application:
+    name: home-admin
+  thymeleaf:
+    cache: false
+    prefix: classpath:/templates/
+    suffix: .html
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://192.168.1.9:9100/eureka/
+
+# 指定调用本地service
+feign:
+  client:
+    config:
+      home-service: # 使用服务名作为key
+        url: http://localhost:9005
+
+ribbon:
+  eureka:
+    enabled: true
+
+home-service:
+  ribbon:
+    listOfServers: http://localhost:9005  # 强制指向本地
+    NIWSServerListClassName: com.netflix.loadbalancer.ConfigurationBasedServerList
