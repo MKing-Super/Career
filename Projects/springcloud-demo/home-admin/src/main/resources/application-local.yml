@@ -12,14 +12,9 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: http://192.168.1.9:9100/eureka/
-
-# 指定调用本地service
-feign:
-  client:
-    config:
-      home-service: # 使用服务名作为key
-        url: http://localhost:9005
+      defaultZone: http://10.50.10.113:9100/eureka/
+    register-with-eureka: false # 禁止注册
+    fetch-registry: true        # 允许拉取服务列表（用于服务发现）
 
 ribbon:
   eureka:
