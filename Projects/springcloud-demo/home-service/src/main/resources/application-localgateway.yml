@@ -1,11 +1,6 @@
 server:
   port: 9005
 
-# 禁用服务注册
-eureka:
-  client:
-    enabled: false
-
 spring:
   application:
     name: home-service
@@ -16,3 +11,16 @@ spring:
     driver-class-name: com.mysql.jdbc.Driver
     initialization-mode: always
     platform: mysql
+
+eureka:
+  client:
+    enabled: false
+    service-url:
+      defaultZone: http://10.50.10.113:9100/eureka/
+    register-with-eureka: false # 禁止注册
+    fetch-registry: true        # 允许拉取服务列表（用于服务发现）
+
+api-gateway:
+  ribbon:
+    listOfServers: http://localhost:9200  # 强制指向本地
+    NIWSServerListClassName: com.netflix.loadbalancer.ConfigurationBasedServerList

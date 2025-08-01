@@ -1,11 +1,25 @@
 server:
   port: 80
 
+spring:
+  application:
+    name: home-admin
+  thymeleaf:
+    cache: false
+    prefix: classpath:/templates/
+    suffix: .html
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://10.50.10.113:9100/eureka/
+    register-with-eureka: false # 禁止注册
+    fetch-registry: true        # 允许拉取服务列表（用于服务发现）
+
 # 强制所有请求走本地Gateway
 ribbon:
   eureka:
     enabled: false  # 禁用Ribbon的Eureka集成
-  listOfServers: http://localhost:9200  # 固定指向本地Gateway
 
 # Feign客户端配置（无需修改代码）
 feign:
@@ -15,3 +29,8 @@ feign:
         path: /remote  # 默认走远程路由
       home-service:
         path: /local/home-service  # 特殊路径走本地
+
+api-gateway:
+  ribbon:
+    listOfServers: http://localhost:9200  # 强制指向本地
+    NIWSServerListClassName: com.netflix.loadbalancer.ConfigurationBasedServerList
