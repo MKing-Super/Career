@@ -1,4 +1,4 @@
-package per.mk.pirate.netty;
+package per.mk.pirate.netty.test;
 
 
 public class ChannelUtil {

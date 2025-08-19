@@ -1,7 +1,7 @@
-package per.mk.pirate.netty;
+package per.mk.pirate.netty.test;
 
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.TimerTask;
 
@@ -15,7 +15,7 @@ public class NoticeNettyTask extends TimerTask {
 
     @Override
     public void run() {
-        if (null == req || StringUtils.isEmpty(req.getServiceId())) {
+        if (null == req || StrUtil.isBlank(req.getServiceId())) {
             return;
         }
 

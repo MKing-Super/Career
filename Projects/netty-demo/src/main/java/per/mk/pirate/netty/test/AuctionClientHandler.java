@@ -1,4 +1,4 @@
-package per.mk.pirate.netty;
+package per.mk.pirate.netty.test;
 
 import com.alibaba.fastjson.JSONObject;
 import io.netty.channel.ChannelHandlerContext;

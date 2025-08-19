@@ -1,8 +1,6 @@
-package per.mk.pirate.netty;
+package per.mk.pirate.netty.test;
 
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.Timer;
 
 public class Main {
     public static void main(String[] args) throws Exception {
