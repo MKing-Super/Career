@@ -1,12 +1,13 @@
 package per.mk.pirate.netty.example.client;
 
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.*;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.LengthFieldPrepender;
-import per.mk.pirate.netty.example.client.ClientHandler;
 
 public class NettyClient {
     public static void main(String[] args) throws InterruptedException {
