@@ -14,6 +14,10 @@ import java.util.concurrent.TimeUnit;
 
 // 服务端启动类
 public class NettyServer {
+
+    // 服务端PORT
+    private final static Integer SERVER_PORT = 8080;
+
     public static void main(String[] args) throws InterruptedException {
         EventLoopGroup bossGroup = new NioEventLoopGroup(1);    // 处理连接请求
         EventLoopGroup workerGroup = new NioEventLoopGroup();            // 处理数据读写
@@ -31,8 +35,8 @@ public class NettyServer {
                             ch.pipeline().addLast(new ServerHandler()); // 业务处理器
                         }
                     });
-            ChannelFuture future = bootstrap.bind(8080).sync(); // 绑定端口
-            System.out.println("Server started on port " + 8080);
+            ChannelFuture future = bootstrap.bind(SERVER_PORT).sync(); // 绑定端口
+            System.out.println("Server started on port " + SERVER_PORT);
 
             // 注册停机钩子实现优雅关闭
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {

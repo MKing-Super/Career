@@ -10,6 +10,12 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.LengthFieldPrepender;
 
 public class NettyClient {
+
+    // 服务端IP
+    private final static String SERVER_IP = "127.0.0.1";
+    // 服务端PORT
+    private final static Integer SERVER_PORT = 8080;
+
     public static void main(String[] args) throws InterruptedException {
         EventLoopGroup group = new NioEventLoopGroup(); // 统一管理 I/O
         try {
@@ -23,8 +29,8 @@ public class NettyClient {
                             ch.pipeline().addLast(new ClientHandler());         // 业务处理器
                         }
                     });
-            ChannelFuture future = bootstrap.connect("127.0.0.1", 8080).sync(); // 连接服务端
-            System.out.println("Connected to server at " + "127.0.0.1" + ":" + 8080);
+            ChannelFuture future = bootstrap.connect(SERVER_IP, SERVER_PORT).sync(); // 连接服务端
+            System.out.println("Connected to server at " + SERVER_IP + ":" + SERVER_PORT);
 
             // 阻塞至客户端通道关闭
             future.channel().closeFuture().sync();
