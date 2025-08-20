@@ -3,10 +3,12 @@ package per.mk.pirate.netty.example.client;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
 
 public class NettyClient1 {
@@ -25,8 +27,21 @@ public class NettyClient1 {
                     .handler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel ch) {
-                            ch.pipeline().addLast(new LengthFieldPrepender(4));  // 添加长度头
-                            ch.pipeline().addLast(new ClientHandler());         // 业务处理器
+                            ChannelPipeline pipeline = ch.pipeline();
+                            // 入站处理链
+                            pipeline.addLast(new LengthFieldBasedFrameDecoder(
+                                    1024 * 1024,  // maxFrameLength = 1MB
+                                    0,            // lengthFieldOffset (长度字段从0开始)
+                                    4,            // lengthFieldLength (int占4字节)
+                                    0,            // lengthAdjustment (长度仅含Body)
+                                    4             // initialBytesToStrip (丢弃长度字段，只传Body)
+                            )); // 切割帧
+
+                            // 出站处理链
+                            pipeline.addLast(new LengthFieldPrepender(4));  // 添加长度头
+
+                            // 业务逻辑
+                            pipeline.addLast(new ClientHandler());
                         }
                     });
             ChannelFuture future = bootstrap.connect(SERVER_IP, SERVER_PORT).sync(); // 连接服务端
