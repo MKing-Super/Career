@@ -41,7 +41,8 @@ public class NettyServer {
                             // 出站处理链
                             pipeline.addLast(new LengthFieldPrepender(4));
 
-                            pipeline.addLast(new ServerHandler()); // 业务处理器
+                            // 业务逻辑
+                            pipeline.addLast(new ServerHandler());
                         }
                     });
             ChannelFuture future = bootstrap.bind(SERVER_PORT).sync(); // 绑定端口
