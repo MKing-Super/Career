@@ -1,5 +1,6 @@
 package per.mk.pirate.netty.example.client;
 
+
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -9,8 +10,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.LengthFieldPrepender;
 
-public class NettyClient {
-
+public class NettyClient2 {
     // 服务端IP
     private final static String SERVER_IP = "127.0.0.1";
     // 服务端PORT
