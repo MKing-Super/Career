@@ -11,7 +11,7 @@ import io.netty.util.concurrent.GlobalEventExecutor;
 // SimpleChannelInboundHandler 只处理文本帧，更适合websocket
 public class WebsocketHandler extends SimpleChannelInboundHandler<TextWebSocketFrame>  {
 
-    private static final ChannelGroup channels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
+    private static final ChannelGroup channels = ChannelManager.channelGroup;
 
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {

@@ -6,14 +6,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-/**
- * @describe: TODO
- * @Author MK
- * @PackageName netty-demo
- * @Package per.mk.pirate.netty.websocket.server
- * @Date 2025/8/21 11:36
- * @Version 1.0
- */
+// 服务端 启动
 public class ServerMain {
     static ThreadPoolExecutor executor = new ThreadPoolExecutor(
             2,          // corePoolSize
