@@ -7,7 +7,7 @@ import io.netty.channel.group.ChannelGroup;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 
 // SimpleChannelInboundHandler 只处理文本帧，更适合websocket
-public class WebsocketHandler extends SimpleChannelInboundHandler<TextWebSocketFrame>  {
+public class WebsocketServerHandler extends SimpleChannelInboundHandler<TextWebSocketFrame>  {
 
     private static final ChannelGroup channels = ChannelManager.channelGroup;
 

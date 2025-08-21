@@ -36,7 +36,7 @@ public class WebsocketServer implements Runnable {
                             pipeline.addLast(new WebSocketServerProtocolHandler("/ws"));// 处理WebSocket协议升级与帧管理
 
                             // 业务逻辑
-                            pipeline.addLast(new WebsocketHandler());
+                            pipeline.addLast(new WebsocketServerHandler());
                         }
                     });
             ChannelFuture future = bootstrap.bind(SERVER_PORT).sync(); // 绑定端口
