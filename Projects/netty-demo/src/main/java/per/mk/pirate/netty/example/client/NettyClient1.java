@@ -15,6 +15,7 @@ import io.netty.handler.codec.string.StringEncoder;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.TimeUnit;
 
 public class NettyClient1 {
 
@@ -53,6 +54,12 @@ public class NettyClient1 {
                     });
             ChannelFuture future = bootstrap.connect(SERVER_IP, SERVER_PORT).sync(); // 连接服务端
             System.out.println("Connected to server at " + SERVER_IP + ":" + SERVER_PORT);
+
+            // 注册停机钩子实现优雅关闭
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                group.shutdownGracefully(1, 5, TimeUnit.SECONDS); // 安静期1秒，超时5秒
+                System.out.println("Client resources released");
+            }));
 
             // 阻塞至客户端通道关闭
             future.channel().closeFuture().sync();
