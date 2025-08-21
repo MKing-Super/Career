@@ -3,9 +3,7 @@ package per.mk.pirate.netty.websocket.client;
 import cn.hutool.core.date.DateUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.*;
 import io.netty.util.CharsetUtil;
 
 import java.util.Date;
@@ -28,12 +26,20 @@ public class NettyClientHandler extends ChannelInboundHandlerAdapter {
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         Channel incoming = ctx.channel();
         System.out.println(incoming.remoteAddress() + " 3.channelActive() 连接建立完成时");
-//        System.out.println("Client:" + incoming.remoteAddress() + " 在线~");
 
-        String format = DateUtil.format(new Date(), "yyyy-MM-dd HH:mm:ss");
         // 连接建立后发送第一条消息
+        String format = DateUtil.format(new Date(), "yyyy-MM-dd HH:mm:ss");
         ByteBuf msg = Unpooled.copiedBuffer("客户端发起-连接建立后发送第一条消息 Hello Server! " + format , CharsetUtil.UTF_8);
-        ctx.writeAndFlush(msg);
+        ChannelFuture future = ctx.writeAndFlush(msg);
+        // 监听结果 异步回调（支持链式）
+        future.addListener((ChannelFutureListener) f -> {
+            String s = "ID: " + incoming.id() + " | Addr: " + incoming.remoteAddress();
+            if (f.isSuccess()) {
+                System.out.println(s + " 异步写入成功~");
+            } else {
+                System.out.println(s + " 异步写入失败！ error：" + f.cause());
+            }
+        });
     }
 
     @Override
