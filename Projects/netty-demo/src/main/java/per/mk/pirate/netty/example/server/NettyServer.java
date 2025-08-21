@@ -7,7 +7,10 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
+import io.netty.handler.codec.string.StringDecoder;
+import io.netty.handler.codec.string.StringEncoder;
 
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 // 服务端启动类
@@ -37,9 +40,11 @@ public class NettyServer {
                                     0,            // lengthAdjustment (长度仅含Body)
                                     4             // initialBytesToStrip (丢弃长度字段，只传Body)
                             )); // 切割帧
+//                            pipeline.addLast(new StringDecoder(StandardCharsets.UTF_8));// 解码器
 
                             // 出站处理链
-                            pipeline.addLast(new LengthFieldPrepender(4));
+//                            pipeline.addLast(new StringEncoder(StandardCharsets.UTF_8));    // 编码器
+                            pipeline.addLast(new LengthFieldPrepender(4)); // 添加长度头
 
                             // 业务逻辑
                             pipeline.addLast(new ServerHandler());

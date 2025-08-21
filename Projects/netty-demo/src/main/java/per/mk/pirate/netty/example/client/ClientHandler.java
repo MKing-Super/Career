@@ -65,7 +65,7 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
             @Override
             public void run() {
                 // 客户端 业务异步处理
-                ByteBuf buf = (ByteBuf) msg;
+                ByteBuf buf = (ByteBuf) msg; // 解码消息
                 System.out.println("客户端收到: " + buf.toString(CharsetUtil.UTF_8));
             }
         });
