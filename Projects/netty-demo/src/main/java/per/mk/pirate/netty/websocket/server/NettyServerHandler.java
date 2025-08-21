@@ -1,13 +1,38 @@
 package per.mk.pirate.netty.websocket.server;
 
+
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
+import io.netty.util.CharsetUtil;
+import io.netty.util.concurrent.DefaultThreadFactory;
 
-// SimpleChannelInboundHandler 只处理文本帧，更适合websocket
-public class WebsocketHandler extends SimpleChannelInboundHandler<TextWebSocketFrame>  {
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
+public class NettyServerHandler extends ChannelInboundHandlerAdapter {
+
+    // corePoolSize     核心线程数（常驻线程，空闲时不会被销毁）
+    // maximumPoolSize  最大线程数（含核心线程）
+    // keepAliveTime    非核心线程的空闲存活时间
+    // unit             keepAliveTime的时间单位
+    // workQueue        任务队列，缓存待执行任务
+    // threadFactory    线程工厂，定制线程命名/优先级
+    // handler          拒绝策略（当队列和线程池均满时触发）
+    ThreadPoolExecutor executor = new ThreadPoolExecutor(
+            4,          // corePoolSize
+            8,      // maximumPoolSize
+            30,        // keepAliveTime
+            TimeUnit.SECONDS,       // unit
+            new ArrayBlockingQueue<>(100), // workQueue（有界队列）
+            new DefaultThreadFactory("server-pool"), // threadFactory
+            new ThreadPoolExecutor.CallerRunsPolicy() // handler
+    );
 
     private static final ChannelGroup channels = ChannelManager.channelGroup;
 
@@ -37,13 +62,14 @@ public class WebsocketHandler extends SimpleChannelInboundHandler<TextWebSocketF
     }
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, TextWebSocketFrame msg) throws Exception {
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         Channel channel = ctx.channel();
-        System.out.println(channel.remoteAddress() + " 4.channelRead0() 每次收到数据时");
+        System.out.println(channel.remoteAddress() + " 4.channelRead() 每次收到数据时");
         // 广播消息给所有客户端
         channels.forEach(channel1 ->{
-            channel1.writeAndFlush(new TextWebSocketFrame("[" + channel.remoteAddress() + "] " + msg.text()));
+            channel1.writeAndFlush(new TextWebSocketFrame("[" + channel.remoteAddress() + "] " + msg));
         });
+
     }
 
     @Override

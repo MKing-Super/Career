@@ -1,4 +1,4 @@
-package per.mk.pirate.netty.websocket.server;
+package per.mk.pirate.netty.websocket.client;
 
 import io.netty.util.concurrent.DefaultThreadFactory;
 
@@ -6,8 +6,8 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-// 服务端 启动
-public class ServerMain {
+// 后台服务端
+public class ClientMain {
 
     static ThreadPoolExecutor executor = new ThreadPoolExecutor(
             2,          // corePoolSize
@@ -20,9 +20,6 @@ public class ServerMain {
     );
 
     public static void main(String[] args) {
-        // 页面调用
-        executor.execute(new WebsocketServer());
-        // 后台方法调用
-        executor.execute(new NettyServer());
+        executor.execute(new NettyClient());
     }
 }

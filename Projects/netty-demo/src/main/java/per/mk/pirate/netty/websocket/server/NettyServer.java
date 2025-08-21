@@ -5,16 +5,18 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.HttpServerCodec;
-import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import io.netty.handler.codec.LengthFieldPrepender;
+import io.netty.handler.codec.string.StringDecoder;
+import io.netty.handler.codec.string.StringEncoder;
 
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
-public class WebsocketServer implements Runnable {
+public class NettyServer implements Runnable{
 
     // 服务端PORT
-    private final static Integer SERVER_PORT = 8860;
+    private final static Integer SERVER_PORT = 8861;
 
     @Override
     public void run() {
@@ -31,12 +33,21 @@ public class WebsocketServer implements Runnable {
                         protected void initChannel(SocketChannel ch) {
                             ChannelPipeline pipeline = ch.pipeline();
                             // 入站处理链
-                            pipeline.addLast(new HttpServerCodec());// HTTP编解码器
-                            pipeline.addLast(new HttpObjectAggregator(64 * 1024));// 聚合HTTP请求为完整报文（最大64KB）
-                            pipeline.addLast(new WebSocketServerProtocolHandler("/ws"));// 处理WebSocket协议升级与帧管理
+                            pipeline.addLast(new LengthFieldBasedFrameDecoder(
+                                    1024 * 1024,  // maxFrameLength = 1MB
+                                    0,            // lengthFieldOffset (长度字段从0开始)
+                                    4,            // lengthFieldLength (int占4字节)
+                                    0,            // lengthAdjustment (长度仅含Body)
+                                    4             // initialBytesToStrip (丢弃长度字段，只传Body)
+                            )); // 切割帧
+                            pipeline.addLast(new StringDecoder(StandardCharsets.UTF_8));// 解码器
+
+                            // 出站处理链
+                            pipeline.addLast(new StringEncoder(StandardCharsets.UTF_8));    // 编码器
+                            pipeline.addLast(new LengthFieldPrepender(4)); // 添加长度头
 
                             // 业务逻辑
-                            pipeline.addLast(new WebsocketHandler());
+                            pipeline.addLast(new NettyServerHandler());
                         }
                     });
             ChannelFuture future = bootstrap.bind(SERVER_PORT).sync(); // 绑定端口
@@ -52,7 +63,7 @@ public class WebsocketServer implements Runnable {
             // 阻塞至关闭
             future.channel().closeFuture().sync();
         }catch (Exception e){
-          e.printStackTrace();
+            e.printStackTrace();
         } finally {
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
