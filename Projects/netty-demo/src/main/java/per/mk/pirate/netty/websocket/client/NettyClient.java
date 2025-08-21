@@ -12,7 +12,6 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
-import per.mk.pirate.netty.example.client.ClientHandler;
 
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;

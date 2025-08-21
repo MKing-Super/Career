@@ -6,7 +6,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-// 后台服务端
+// 后台-客户端（socket）
 public class ClientMain {
 
     static ThreadPoolExecutor executor = new ThreadPoolExecutor(
