@@ -46,8 +46,8 @@ public class NettyClient implements Runnable {
                             pipeline.addLast(new StringDecoder(StandardCharsets.UTF_8));// 解码器
 
                             // 出站处理链
-                            pipeline.addLast(new StringEncoder(StandardCharsets.UTF_8));    // 编码器
                             pipeline.addLast(new LengthFieldPrepender(4));  // 添加长度头
+                            pipeline.addLast(new StringEncoder(StandardCharsets.UTF_8));    // 编码器
 
                             // 业务逻辑
                             pipeline.addLast(new NettyClientHandler());
