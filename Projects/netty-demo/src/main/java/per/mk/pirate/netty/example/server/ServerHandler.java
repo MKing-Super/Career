@@ -3,11 +3,10 @@ package per.mk.pirate.netty.example.server;
 import cn.hutool.core.date.DateUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.*;
 import io.netty.util.CharsetUtil;
 import io.netty.util.concurrent.DefaultThreadFactory;
+import io.netty.util.concurrent.Promise;
 import per.mk.pirate.netty.example.CustomThreadFactory;
 
 import java.util.Date;
@@ -56,8 +55,8 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        Channel incoming = ctx.channel();
-        System.out.println(incoming.remoteAddress() + " 4.channelRead() 每次收到数据时");
+        Channel channel = ctx.channel();
+        System.out.println(channel.remoteAddress() + " 4.channelRead() 每次收到数据时");
 
         // 服务端 业务异步处理
         executor.execute(new Runnable() {
@@ -71,7 +70,41 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
                     // 响应客户端
                     String format = DateUtil.format(new Date(), "yyyy-MM-dd HH:mm:ss");
                     ByteBuf response = Unpooled.copiedBuffer("服务端响应-连接建立后发送第一条响应消息。 " + format, CharsetUtil.UTF_8);
-                    ctx.writeAndFlush(response); // 自动释放 ByteBuf
+                    ChannelFuture future = ctx.writeAndFlush(response);// 自动释放 ByteBuf
+
+                    // 监听结果 异步回调（支持链式）
+                    future.addListener((ChannelFutureListener) f -> {
+                        if (f.isSuccess()) {
+                            System.out.println("异步写入成功1");
+                        } else {
+                            System.out.println("异步写入失败1: " + f.cause());
+                        }
+                    }).addListener((ChannelFutureListener) f -> {
+                        if (f.isSuccess()) {
+                            System.out.println("异步写入成功2");
+                        } else {
+                            System.out.println("异步写入失败2: " + f.cause());
+                        }
+                    });
+
+                    EventLoop eventLoop = channel.eventLoop();
+                    // 创建 Promise 容器
+                    Promise<Integer> promise = eventLoop.newPromise();
+                    // 异步任务完成后设置结果
+                    eventLoop.execute(() -> {
+                        try {
+                            promise.setSuccess(1); // 手动设置成功
+                        } catch (Exception e) {
+                            promise.setFailure(e); // 手动设置失败
+                        }
+                    });
+                    // 获取结果
+                    promise.addListener(f -> {
+                        if (f.isSuccess()) {
+                            System.out.println("结果: " + f.getNow());
+                        }
+                    });
+
                 }catch (Exception e){
                     System.out.println("服务端 业务异步处理 异常");
                     e.printStackTrace();
