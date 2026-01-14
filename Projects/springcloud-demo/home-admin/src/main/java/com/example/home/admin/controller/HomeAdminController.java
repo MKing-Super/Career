@@ -19,7 +19,7 @@ public class HomeAdminController {
     public String workAdminPage(Model model) {
         model.addAttribute("works", homeServiceFeign.getAllWorks());
         model.addAttribute("newWork", new Home());
-        return "work-admin";
+        return "home-admin";
     }
 
     @PostMapping("/add")
