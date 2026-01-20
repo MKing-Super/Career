@@ -5,6 +5,11 @@ spring:
   application:
     name: api-gateway
   cloud:
+    inetutils:
+      # 忽略 指定 网卡
+      ignored-interfaces:
+        - rmnet_data2     # 忽略 termux中移动网路的网卡
+      use-only-site-local-interfaces: true    # 只使用站点本地地址（内网地址
     gateway:
       routes:
         - id: work-service
@@ -47,4 +52,10 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:9100/eureka/
+      defaultZone: http://10.50.100.46:9100/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+    registry-fetch-interval-seconds: 10 # 获取服务列表间隔
+  instance:
+    prefer-ip-address: true                       # 优先使用IP地址
+    instance-id: ${spring.cloud.client.ip-address}:${server.port}
