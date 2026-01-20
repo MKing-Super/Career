@@ -9,7 +9,7 @@ spring:
       # 忽略 指定 网卡
       ignored-interfaces:
         - rmnet_data2     # 忽略 termux中移动网路的网卡
-      use-only-site-local-interfaces: true    # 只使用站点本地地址（内网地址
+        - rmnet.*
     gateway:
       routes:
         - id: work-service
