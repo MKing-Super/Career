@@ -14,12 +14,12 @@ public class HomeController {
     @Autowired
     private HomeService workService;
 
-    @GetMapping
+    @GetMapping("/getAllWorks")
     public List<Home> getAllWorks() {
         return workService.getAllWorks();
     }
 
-    @PostMapping
+    @GetMapping("/addWork")
     public void addWork(@RequestBody Home work) {
         workService.addWork(work);
     }

@@ -11,10 +11,10 @@ import java.util.List;
 
 @FeignClient(name = "home-service",path = "/home")
 public interface HomeServiceFeign {
-    @GetMapping("/work")
+    @GetMapping("/getAllWorks")
     List<Home> getAllWorks();
 
-    @PostMapping("/work")
+    @PostMapping("/addWork")
     void addWork(@RequestBody Home work);
 
     @GetMapping("/getTest")
