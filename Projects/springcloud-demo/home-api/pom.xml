@@ -53,8 +53,14 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <!-- 使用 provided，让使用方决定具体实现 -->
-            <scope>provided</scope>
+            <version>1.7.30</version>
+        </dependency>
+        <!-- 添加一个具体的日志实现（用于独立运行） -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.2.11</version>
+            <scope>runtime</scope>  <!-- 只在运行时需要 -->
         </dependency>
     </dependencies>
 

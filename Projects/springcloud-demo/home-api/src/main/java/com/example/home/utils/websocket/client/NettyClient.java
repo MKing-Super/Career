@@ -20,8 +20,7 @@ import java.util.concurrent.TimeUnit;
 
 public class NettyClient {
 
-//    private static final Logger log = LoggerFactory.getLogger(NettyClient.class);
-
+    private static final Logger log = LoggerFactory.getLogger(NettyClient.class);
 
     // 服务端IP
     private static String SERVER_IP = "127.0.0.1";
@@ -35,7 +34,7 @@ public class NettyClient {
 
     // 客户端websocket连接 服务端
     public static void connect() {
-        System.out.println("connect() start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+        log.info("connect() start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
         EventLoopGroup group = new NioEventLoopGroup(); // 统一管理 I/O
         try {
             Bootstrap bootstrap = new Bootstrap();
@@ -64,13 +63,13 @@ public class NettyClient {
                         }
                     });
             ChannelFuture future = bootstrap.connect(SERVER_IP, SERVER_PORT).sync(); // 连接服务端
-            System.out.println("Connected to server at " + SERVER_IP + ":" + SERVER_PORT);
+            log.info("Connected to server at " + SERVER_IP + ":" + SERVER_PORT);
             socketChannel = (NioSocketChannel) future.channel();
 
             // 注册停机钩子实现优雅关闭
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 group.shutdownGracefully(1, 5, TimeUnit.SECONDS); // 安静期1秒，超时5秒
-                System.out.println("Client resources released");
+                log.info("Client resources released");
             }));
 
             // 阻塞至客户端通道关闭
@@ -79,7 +78,7 @@ public class NettyClient {
             e.printStackTrace();
             group.shutdownGracefully();
         } finally {
-            System.out.println("connect() end <<<<<<<<<<<<<<<<<<<<<<<<<<<");
+            log.info("connect() end <<<<<<<<<<<<<<<<<<<<<<<<<<<");
         }
     }
 
@@ -106,7 +105,7 @@ public class NettyClient {
             }
             return socketChannel.writeAndFlush(msg);
         }catch (Exception e){
-            System.out.println(e.getMessage());
+            log.error(e.getMessage(),e);
             return null;
         }
     }
