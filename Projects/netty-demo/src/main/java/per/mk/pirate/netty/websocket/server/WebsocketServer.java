@@ -8,10 +8,13 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.TimeUnit;
 
 public class WebsocketServer implements Runnable {
+    private static final Logger log = LoggerFactory.getLogger(WebsocketServer.class);
 
     // 服务端PORT
     private final static Integer SERVER_PORT = 8860;
@@ -40,13 +43,13 @@ public class WebsocketServer implements Runnable {
                         }
                     });
             ChannelFuture future = bootstrap.bind(SERVER_PORT).sync(); // 绑定端口
-            System.out.println("Server started on port " + SERVER_PORT);
+            log.info("Server started on port " + SERVER_PORT);
 
             // 注册停机钩子实现优雅关闭
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 bossGroup.shutdownGracefully(1, 5, TimeUnit.SECONDS); // 安静期1秒，超时5秒
                 workerGroup.shutdownGracefully(1, 5, TimeUnit.SECONDS);
-                System.out.println("Server resources released");
+                log.warn("Server resources released");
             }));
 
             // 阻塞至关闭
