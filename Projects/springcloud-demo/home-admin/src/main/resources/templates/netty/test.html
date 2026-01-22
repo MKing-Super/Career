@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>netty test</title>
+    <script type="text/javascript" th:src="@{/js/jquery-1.8.3.js}"></script>
+</head>
+<body>
+<h1>netty test</h1>
+
+<input type="text" id="send" style="width: 100%;">
+<input type="button" id="save" value="发送">
+<script type="text/javascript">
+    $(function (){
+        $("#save").click(function (){
+            var msg = document.getElementById('send').value
+            $.ajax({
+                url:"/netty/receiveMsg",
+                data:{
+                    "msg":msg
+                },
+                success:function(data){
+                    console.log(data)
+                    document.getElementById('send').value = ''
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>

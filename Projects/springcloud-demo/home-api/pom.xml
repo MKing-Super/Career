@@ -35,6 +35,27 @@
             <artifactId>hutool-all</artifactId>
             <version>5.8.26</version>
         </dependency>
+
+        <!-- websocket -->
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+            <version>4.1.23.Final</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- 核心：SLF4J API（必须） -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <!-- 使用 provided，让使用方决定具体实现 -->
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
 </project>
