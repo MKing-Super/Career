@@ -19,7 +19,7 @@ public class NettyServer implements Runnable{
     private static final Logger log = LoggerFactory.getLogger(NettyServer.class);
 
     // 服务端PORT
-    private final static Integer SERVER_PORT = 8861;
+    private static Integer SERVER_PORT = 8861;
 
     @Override
     public void run() {
@@ -54,13 +54,13 @@ public class NettyServer implements Runnable{
                         }
                     });
             ChannelFuture future = bootstrap.bind(SERVER_PORT).sync(); // 绑定端口
-            log.info("Server started on port " + SERVER_PORT);
+            log.info("NettyServer started on port " + SERVER_PORT);
 
             // 注册停机钩子实现优雅关闭
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 bossGroup.shutdownGracefully(1, 5, TimeUnit.SECONDS); // 安静期1秒，超时5秒
                 workerGroup.shutdownGracefully(1, 5, TimeUnit.SECONDS);
-                log.warn("Server resources released");
+                log.warn("NettyServer resources released");
             }));
 
             // 阻塞至关闭
@@ -73,4 +73,7 @@ public class NettyServer implements Runnable{
         }
     }
 
+    public static void setServerPort(Integer serverPort) {
+        SERVER_PORT = serverPort;
+    }
 }
