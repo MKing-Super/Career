@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -149,6 +149,13 @@
     </div>
 
     <script>
+        const config = {
+            lanIp: '[[${lanIp}]]',
+            port: '[[${port}]]'
+        };
+
+        var wsUrl = 'ws://'+config.lanIp+':'+config.port+'/ws'
+
         // 获取DOM元素
         const messageContainer = document.getElementById('message-container');
         const messageInput = document.getElementById('message-input');
@@ -157,7 +164,7 @@
         const serverUrlElement = document.getElementById('server-url');
         
         // 创建WebSocket连接
-        const socket = new WebSocket('ws://localhost:8860/ws');
+        const socket = new WebSocket(wsUrl);
         
         // 格式化时间戳
         function formatTime(date) {

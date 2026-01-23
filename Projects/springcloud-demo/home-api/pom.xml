@@ -62,6 +62,12 @@
             <version>1.2.11</version>
             <scope>runtime</scope>  <!-- 只在运行时需要 -->
         </dependency>
+
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>1.2.28</version>
+        </dependency>
     </dependencies>
 
 </project>
