@@ -156,6 +156,8 @@
 
         var wsUrl = 'ws://'+config.lanIp+':'+config.port+'/ws'
 
+        document.getElementById('server-url').innerText = wsUrl
+
         // 获取DOM元素
         const messageContainer = document.getElementById('message-container');
         const messageInput = document.getElementById('message-input');
