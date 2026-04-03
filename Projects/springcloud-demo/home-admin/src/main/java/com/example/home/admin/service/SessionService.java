@@ -15,13 +15,24 @@ public class SessionService {
     @Autowired
     private StringRedisTemplate redisTemplate;
 
-    public String getUsername(String sessionId) {
+    public String getUsername(String sessionId, String userAgent, String ip) {
         if (sessionId == null || sessionId.isEmpty()) return null;
         String key = SESSION_PREFIX + sessionId;
         String value = redisTemplate.opsForValue().get(key);
         if (value != null) {
-            redisTemplate.expire(key, SESSION_TIMEOUT, TimeUnit.SECONDS);
-            return value.split(":")[0];
+            String[] parts = value.split(":");
+            if (parts.length < 4) {
+                return null;
+            }
+            String storedUserAgent = parts[2];
+            String storedIp = parts[3];
+            boolean userAgentMatch = (userAgent == null && storedUserAgent.isEmpty()) || (userAgent != null && userAgent.equals(storedUserAgent));
+            boolean ipMatch = (ip == null && storedIp.isEmpty()) || (ip != null && ip.equals(storedIp));
+            if (userAgentMatch && ipMatch) {
+                redisTemplate.expire(key, SESSION_TIMEOUT, TimeUnit.SECONDS);
+                return parts[0];
+            }
+            redisTemplate.delete(key);
         }
         return null;
     }

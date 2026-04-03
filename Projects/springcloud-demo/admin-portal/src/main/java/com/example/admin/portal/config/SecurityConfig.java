@@ -114,7 +114,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .formLogin()
                 .loginPage("/login")
                 .successHandler((request, response, authentication) -> {
-                    String sessionId = sessionService.createSession(authentication.getName(), authentication.getAuthorities().toString());
+                    String userAgent = request.getHeader("User-Agent");
+                    String ip = request.getRemoteAddr();
+                    String role = authentication.getAuthorities().stream()
+                        .map(a -> a.getAuthority().replace("ROLE_", ""))
+                        .findFirst().orElse("ADMIN");
+                    String sessionId = sessionService.createSession(authentication.getName(), role, userAgent, ip);
                     response.addCookie(createSessionCookie(sessionId));
                     response.sendRedirect("/portal");
                 })

@@ -77,16 +77,29 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
             Cookie cookie = getSessionCookie(request);
             if (cookie != null) {
+                String userAgent = request.getHeader("User-Agent");
+                String ip = request.getRemoteAddr();
                 String key = SESSION_PREFIX + cookie.getValue();
                 String value = redisTemplate.opsForValue().get(key);
                 if (value != null) {
-                    String username = value.split(":")[0];
-                    String role = value.length() > 1 ? value.split(":")[1] : "ADMIN";
-                    redisTemplate.expire(key, SESSION_TIMEOUT, TimeUnit.SECONDS);
-                    UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                        username, null, Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role))
-                    );
-                    SecurityContextHolder.getContext().setAuthentication(auth);
+                    String[] parts = value.split(":");
+                    if (parts.length >= 4) {
+                        String storedUserAgent = parts[2];
+                        String storedIp = parts[3];
+                        boolean userAgentMatch = (userAgent == null && storedUserAgent.isEmpty()) || (userAgent != null && userAgent.equals(storedUserAgent));
+                        boolean ipMatch = (ip == null && storedIp.isEmpty()) || (ip != null && ip.equals(storedIp));
+                        if (userAgentMatch && ipMatch) {
+                            String username = parts[0];
+                            String role = parts[1];
+                            redisTemplate.expire(key, SESSION_TIMEOUT, TimeUnit.SECONDS);
+                            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                                username, null, Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role))
+                            );
+                            SecurityContextHolder.getContext().setAuthentication(auth);
+                        } else {
+                            redisTemplate.delete(key);
+                        }
+                    }
                 }
             }
             filterChain.doFilter(request, response);

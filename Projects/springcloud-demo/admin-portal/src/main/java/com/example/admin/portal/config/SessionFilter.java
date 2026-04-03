@@ -24,14 +24,15 @@ public class SessionFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         Cookie cookie = getSessionCookie(request);
         if (cookie != null) {
-            String sessionData = sessionService.getUsername(cookie.getValue());
+            String userAgent = request.getHeader("User-Agent");
+            String ip = request.getRemoteAddr();
+            String sessionData = sessionService.getUsername(cookie.getValue(), userAgent, ip);
             if (sessionData != null) {
-                String[] parts = sessionData.split(":");
-                String username = parts[0];
-                String role = parts.length > 1 ? parts[1] : "ADMIN";
+                String username = sessionData;
+                String role = sessionService.getRole(cookie.getValue());
                 
                 UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                    username, null, Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role))
+                    username, null, Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + (role != null ? role : "ADMIN")))
                 );
                 SecurityContextHolder.getContext().setAuthentication(auth);
             }

@@ -69,14 +69,16 @@ public class RedisController {
             return "No expiration";
         } else if (ttl == 0) {
             return "Expired";
-        } else if (ttl < 60) {
-            return ttl + " seconds";
-        } else if (ttl < 3600) {
-            return (ttl / 60) + " minutes";
-        } else if (ttl < 86400) {
-            return (ttl / 3600) + " hours";
-        } else {
-            return (ttl / 86400) + " days";
         }
+        long days = ttl / 86400;
+        long hours = (ttl % 86400) / 3600;
+        long minutes = (ttl % 3600) / 60;
+        long seconds = ttl % 60;
+        StringBuilder sb = new StringBuilder();
+        if (days > 0) sb.append(days).append("d-");
+        if (hours > 0) sb.append(hours).append("h-");
+        if (minutes > 0) sb.append(minutes).append("m-");
+        sb.append(seconds).append("s");
+        return sb.toString();
     }
 }

@@ -77,7 +77,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
             Cookie cookie = getSessionCookie(request);
             if (cookie != null) {
-                String sessionData = sessionService.getUsername(cookie.getValue());
+                String userAgent = request.getHeader("User-Agent");
+                String ip = request.getRemoteAddr();
+                String sessionData = sessionService.getUsername(cookie.getValue(), userAgent, ip);
                 if (sessionData != null) {
                     String role = sessionService.getRole(cookie.getValue());
                     UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(

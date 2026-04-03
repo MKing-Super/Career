@@ -16,19 +16,23 @@ public class SessionService {
     @Autowired
     private StringRedisTemplate redisTemplate;
 
-    public String createSession(String username, String role) {
+    public String createSession(String username, String role, String userAgent, String ip) {
         String sessionId = UUID.randomUUID().toString();
         String key = SESSION_PREFIX + sessionId;
-        redisTemplate.opsForValue().set(key, username + ":" + role, SESSION_TIMEOUT, TimeUnit.SECONDS);
+        String value = username + ":" + role + ":" + (userAgent != null ? userAgent : "") + ":" + (ip != null ? ip : "");
+        redisTemplate.opsForValue().set(key, value, SESSION_TIMEOUT, TimeUnit.SECONDS);
         return sessionId;
     }
 
-    public String getUsername(String sessionId) {
+    public String getUsername(String sessionId, String userAgent, String ip) {
         String key = SESSION_PREFIX + sessionId;
         String value = redisTemplate.opsForValue().get(key);
         if (value != null) {
-            redisTemplate.expire(key, SESSION_TIMEOUT, TimeUnit.SECONDS);
-            return value.split(":")[0];
+            String[] parts = value.split(":");
+            if (parts.length >= 2) {
+                redisTemplate.expire(key, SESSION_TIMEOUT, TimeUnit.SECONDS);
+                return parts[0];
+            }
         }
         return null;
     }
@@ -36,5 +40,17 @@ public class SessionService {
     public void invalidateSession(String sessionId) {
         String key = SESSION_PREFIX + sessionId;
         redisTemplate.delete(key);
+    }
+
+    public String getRole(String sessionId) {
+        String key = SESSION_PREFIX + sessionId;
+        String value = redisTemplate.opsForValue().get(key);
+        if (value != null) {
+            String[] parts = value.split(":");
+            if (parts.length >= 2) {
+                return parts[1];
+            }
+        }
+        return null;
     }
 }
