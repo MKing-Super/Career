@@ -10,7 +10,8 @@ spring:
     suffix: .html
 
 logging:
-  file: D:/logs/springcloud-demo/life-admin.log
+  file:
+    name: D:/mk-logs/life-admin.log
   level:
     root: INFO
 

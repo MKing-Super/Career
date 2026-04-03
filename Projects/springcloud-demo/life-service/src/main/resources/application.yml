@@ -16,7 +16,8 @@ spring:
       nodes: 10.100.210.165:7001,10.100.210.165:7002,10.100.210.165:7003,10.100.210.166:7001,10.100.210.166:7002,10.100.210.166:7003
 
 logging:
-  file: D:/logs/springcloud-demo/life-service.log
+  file:
+    name: D:/mk-logs/life-service.log
   level:
     root: INFO
 

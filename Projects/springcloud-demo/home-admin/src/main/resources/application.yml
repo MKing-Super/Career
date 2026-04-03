@@ -4,3 +4,9 @@ spring:
     #active: local
     #active: localgateway
 
+logging:
+  file:
+    name: D:/mk-logs/home-admin.log
+  level:
+    root: INFO
+

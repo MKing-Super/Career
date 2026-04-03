@@ -2,7 +2,8 @@ server:
   port: 9100
 
 logging:
-  file: D:/logs/springcloud-demo/eureka-server.log
+  file:
+    name: D:/mk-logs/eureka-server.log
   level:
     root: INFO
 

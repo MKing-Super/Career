@@ -2,3 +2,9 @@ spring:
   profiles:
     active: dev
     #active: localgateway
+
+logging:
+  file:
+    name: D:/mk-logs/api-gateway.log
+  level:
+    root: INFO

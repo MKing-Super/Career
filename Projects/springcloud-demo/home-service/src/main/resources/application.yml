@@ -4,6 +4,12 @@ spring:
     #active: local
     #active: localgateway
 
+logging:
+  file:
+    name: D:/mk-logs/home-service.log
+  level:
+    root: INFO
+
 mybatis:
   mapper-locations: classpath:mapper/*.xml
   type-aliases-package: com.example.work.model

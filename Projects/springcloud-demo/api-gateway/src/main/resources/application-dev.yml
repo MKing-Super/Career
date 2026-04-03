@@ -50,7 +50,8 @@ spring:
             - StripPrefix=1
 
 logging:
-  file: D:/logs/springcloud-demo/api-gateway.log
+  file:
+    name: D:/mk-logs/api-gateway.log
   level:
     root: INFO
 

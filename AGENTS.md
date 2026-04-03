@@ -150,3 +150,8 @@ mvn clean install -DskipTests
 - Configuration via `application.yml` in resources directory
 - MyBatis mapper XML files in `src/main/resources/mapper/`
 - HTML templates in `src/main/resources/templates/`
+
+## Git Workflow
+- After creating new files, always add them to git staging: `git add <file-paths>`
+- Verify with `git status --short` to ensure new files show as `A` (staged)
+- Exclude IDE files (`.idea`, `.iml`, `target`) from staging
