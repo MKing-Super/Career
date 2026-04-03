@@ -11,6 +11,14 @@ spring:
     driver-class-name: com.mysql.jdbc.Driver
     initialization-mode: always
     platform: mysql
+  redis:
+    cluster:
+      nodes: 10.100.210.165:7001,10.100.210.165:7002,10.100.210.165:7003,10.100.210.166:7001,10.100.210.166:7002,10.100.210.166:7003
+
+logging:
+  file: D:/logs/springcloud-demo/home-service.log
+  level:
+    root: INFO
 
 eureka:
   client:

@@ -9,6 +9,11 @@ spring:
     prefix: classpath:/templates/
     suffix: .html
 
+logging:
+  file: D:/logs/springcloud-demo/home-admin.log
+  level:
+    root: INFO
+
 eureka:
   client:
     service-url:

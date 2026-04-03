@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.util.Map;
+
 @Controller
 @RequestMapping("/admin/home")
 public class HomeAdminController {
@@ -25,6 +27,6 @@ public class HomeAdminController {
     @PostMapping("/add")
     public String addWork(Home work) {
         homeServiceFeign.addWork(work);
-        return "redirect:/admin/work";
+        return "redirect:/admin/home";
     }
 }

@@ -49,6 +49,11 @@ spring:
           filters:
             - StripPrefix=1
 
+logging:
+  file: D:/logs/springcloud-demo/api-gateway.log
+  level:
+    root: INFO
+
 eureka:
   client:
     service-url:

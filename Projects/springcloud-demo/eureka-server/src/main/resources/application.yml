@@ -1,6 +1,11 @@
 server:
   port: 9100
 
+logging:
+  file: D:/logs/springcloud-demo/eureka-server.log
+  level:
+    root: INFO
+
 eureka:
   instance:
     hostname: localhost

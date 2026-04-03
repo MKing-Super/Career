@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Redis Admin</title>
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .search-box, .add-box { margin-bottom: 20px; padding: 15px; border: 1px solid #ccc; }
+        .key-list { max-height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin-bottom: 20px; }
+        .key-item { cursor: pointer; padding: 5px 10px; margin: 2px; background: #f0f0f0; display: inline-block; border-radius: 3px; }
+        .key-item:hover { background: #e0e0e0; }
+        .key-item.selected { background: #4CAF50; color: white; }
+        .value-display { background: #f5f5f5; padding: 15px; border: 1px solid #ccc; white-space: pre-wrap; word-break: break-all; min-height: 60px; }
+        .nav { margin-bottom: 20px; }
+        .nav a { margin-right: 15px; }
+        input[type="text"] { padding: 5px; }
+        button { padding: 5px 15px; cursor: pointer; }
+        .tab-box { margin-bottom: 15px; }
+        .tab-box button { margin-right: 5px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <a href="/admin/home">Home</a>
+        <a href="/admin/redis">Redis</a>
+    </div>
+
+    <h1>Redis String Operations</h1>
+
+    <div class="tab-box">
+        <button onclick="showTab('search')">Search Keys</button>
+        <button onclick="showTab('add')">Add/Update Key</button>
+    </div>
+
+    <div id="search-tab" class="tab-content active">
+        <div class="search-box">
+            <input type="text" id="keyPattern" placeholder="Key pattern (e.g. *)" value="*" style="width: 300px;">
+            <button onclick="searchKeys()">Search Keys</button>
+            <button onclick="clearKeys()">Clear</button>
+        </div>
+
+        <h3>Keys (<span id="keyCount">0</span>)</h3>
+        <div id="keysResult" class="key-list"></div>
+
+        <h3>Value</h3>
+        <div style="margin-bottom: 10px;">
+            <input type="text" id="selectedKey" placeholder="Selected key" readonly style="width: 400px;">
+            <button onclick="getValue()">Get Value</button>
+            <button onclick="deleteKey()">Delete</button>
+            <button onclick="editKey()">Edit</button>
+        </div>
+        <textarea id="valueDisplay" class="value-display" style="width: 100%; min-height: 80px;" placeholder="Select a key to view its value"></textarea>
+    </div>
+
+    <div id="add-tab" class="tab-content">
+        <div class="add-box">
+            <h3>Add / Update String Key</h3>
+            <div style="margin-bottom: 10px;">
+                <label>Key: </label><br>
+                <input type="text" id="newKey" style="width: 400px;" placeholder="Enter key">
+            </div>
+            <div style="margin-bottom: 10px;">
+                <label>Value: </label><br>
+                <textarea id="newValue" style="width: 100%; min-height: 100px;" placeholder="Enter value"></textarea>
+            </div>
+            <button onclick="saveValue()">Save</button>
+            <button onclick="clearAddForm()">Clear</button>
+        </div>
+    </div>
+
+<script>
+function showTab(tab) {
+    $('.tab-content').removeClass('active');
+    $('#' + tab + '-tab').addClass('active');
+}
+
+function searchKeys() {
+    var pattern = $('#keyPattern').val();
+    $.get('/admin/redis/keys?pattern=' + encodeURIComponent(pattern), function(data) {
+        var html = '';
+        if (data.keys && data.keys.length > 0) {
+            data.keys.forEach(function(key) {
+                html += '<span class="key-item" onclick="selectKey(\'' + escapeHtml(key) + '\')">' + key + '</span>';
+            });
+        } else {
+            html = 'No keys found';
+        }
+        $('#keysResult').html(html);
+        $('#keyCount').text(data.count || 0);
+        $('#selectedKey').val('');
+        $('#valueDisplay').val('');
+    });
+}
+
+function selectKey(key) {
+    $('.key-item').removeClass('selected');
+    event.target.classList.add('selected');
+    $('#selectedKey').val(key);
+    getValue();
+}
+
+function getValue() {
+    var key = $('#selectedKey').val();
+    if (!key) return;
+    $.get('/admin/redis/value/' + encodeURIComponent(key), function(data) {
+        $('#valueDisplay').val(data.value || '');
+    });
+}
+
+function deleteKey() {
+    var key = $('#selectedKey').val();
+    if (!key) return;
+    if (!confirm('Delete key: ' + key + '?')) return;
+    $.ajax({
+        url: '/admin/redis/key/' + encodeURIComponent(key),
+        type: 'DELETE',
+        success: function(data) {
+            alert('Key deleted: ' + data.deleted);
+            searchKeys();
+            $('#selectedKey').val('');
+            $('#valueDisplay').val('');
+        }
+    });
+}
+
+function editKey() {
+    var key = $('#selectedKey').val();
+    var value = $('#valueDisplay').val();
+    if (!key) return;
+    $('#newKey').val(key);
+    $('#newValue').val(value);
+    showTab('add');
+}
+
+function saveValue() {
+    var key = $('#newKey').val();
+    var value = $('#newValue').val();
+    if (!key) {
+        alert('Please enter a key');
+        return;
+    }
+    $.post('/admin/redis/value?key=' + encodeURIComponent(key) + '&value=' + encodeURIComponent(value), function(data) {
+        alert('Saved successfully');
+        clearAddForm();
+        showTab('search');
+        searchKeys();
+    });
+}
+
+function clearAddForm() {
+    $('#newKey').val('');
+    $('#newValue').val('');
+}
+
+function clearKeys() {
+    $('#keysResult').html('');
+    $('#keyCount').text('0');
+    $('#selectedKey').val('');
+    $('#valueDisplay').val('');
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+}
+</script>
+</body>
+</html>
