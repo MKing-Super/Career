@@ -1,6 +1,7 @@
 package com.example.admin.portal.config;
 
 import com.example.admin.portal.feign.UserFeign;
+import com.example.admin.portal.service.SessionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,7 +17,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.util.Collections;
 import java.util.Map;
@@ -27,6 +28,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private UserFeign userFeign;
+
+    @Autowired
+    private SessionService sessionService;
+
+    @Bean
+    public SessionFilter sessionFilter() {
+        return new SessionFilter();
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -104,18 +113,49 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
             .formLogin()
                 .loginPage("/login")
-                .defaultSuccessUrl("/portal", true)
+                .successHandler((request, response, authentication) -> {
+                    String sessionId = sessionService.createSession(authentication.getName(), authentication.getAuthorities().toString());
+                    response.addCookie(createSessionCookie(sessionId));
+                    response.sendRedirect("/portal");
+                })
                 .permitAll()
                 .and()
             .logout()
                 .logoutUrl("/logout")
                 .logoutSuccessUrl("/login?logout")
-                .invalidateHttpSession(true)
-                .deleteCookies("SESSION")
+                .addLogoutHandler((request, response, authentication) -> {
+                    javax.servlet.http.Cookie cookie = getSessionCookie(request);
+                    if (cookie != null) {
+                        sessionService.invalidateSession(cookie.getValue());
+                        cookie.setMaxAge(0);
+                        response.addCookie(cookie);
+                    }
+                })
                 .permitAll()
                 .and()
             .csrf().disable()
             .sessionManagement()
-                .maximumSessions(1);
+                .sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.STATELESS)
+                .and()
+            .addFilterBefore(sessionFilter(), UsernamePasswordAuthenticationFilter.class);
+    }
+
+    private javax.servlet.http.Cookie createSessionCookie(String sessionId) {
+        javax.servlet.http.Cookie cookie = new javax.servlet.http.Cookie("MK_SESSION", sessionId);
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        return cookie;
+    }
+
+    private javax.servlet.http.Cookie getSessionCookie(javax.servlet.http.HttpServletRequest request) {
+        javax.servlet.http.Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (javax.servlet.http.Cookie cookie : cookies) {
+                if ("MK_SESSION".equals(cookie.getName())) {
+                    return cookie;
+                }
+            }
+        }
+        return null;
     }
 }

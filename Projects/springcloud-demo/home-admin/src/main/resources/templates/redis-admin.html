@@ -5,15 +5,18 @@
     <title>Redis Admin</title>
     <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; padding: 20px; }
+        body { margin: 0; font-family: Arial, sans-serif; }
+        .nav-tabs { background: #f5f5f5; padding: 10px 20px; border-bottom: 1px solid #ddd; }
+        .nav-tabs a { margin-right: 15px; padding: 8px 15px; text-decoration: none; color: #333; background: white; border: 1px solid #ddd; border-radius: 4px; }
+        .nav-tabs a:hover { background: #e0e0e0; }
+        .nav-tabs a.active { background: #3498db; color: white; border-color: #3498db; }
+        .content { padding: 20px; }
         .search-box, .add-box { margin-bottom: 20px; padding: 15px; border: 1px solid #ccc; }
         .key-list { max-height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin-bottom: 20px; }
         .key-item { cursor: pointer; padding: 5px 10px; margin: 2px; background: #f0f0f0; display: inline-block; border-radius: 3px; }
         .key-item:hover { background: #e0e0e0; }
         .key-item.selected { background: #4CAF50; color: white; }
         .value-display { background: #f5f5f5; padding: 15px; border: 1px solid #ccc; white-space: pre-wrap; word-break: break-all; min-height: 60px; }
-        .nav { margin-bottom: 20px; }
-        .nav a { margin-right: 15px; }
         input[type="text"] { padding: 5px; }
         button { padding: 5px 15px; cursor: pointer; }
         .tab-box { margin-bottom: 15px; }
@@ -23,16 +26,20 @@
     </style>
 </head>
 <body>
-    <div class="nav">
-        <a href="/admin/home">Home</a>
-        <a href="/admin/redis">Redis</a>
-    </div>
+<div class="nav-tabs">
+    <a href="/admin/home" th:class="${#httpServletRequest.requestURI == '/admin/home' ? 'active' : ''}">Home</a>
+    <a href="/admin/redis" th:class="${#httpServletRequest.requestURI == '/admin/redis' ? 'active' : ''}">Redis</a>
+    <a href="/netty" th:class="${#httpServletRequest.requestURI == '/netty' ? 'active' : ''}">Netty</a>
+    <a href="/test" th:class="${#httpServletRequest.requestURI == '/test' ? 'active' : ''}">Test</a>
+</div>
 
+<div class="content">
     <h1>Redis String Operations</h1>
 
     <div class="tab-box">
         <button onclick="showTab('search')">Search Keys</button>
         <button onclick="showTab('add')">Add/Update Key</button>
+        <button onclick="showTab('batch')">Batch Delete</button>
     </div>
 
     <div id="search-tab" class="tab-content active">
@@ -71,6 +78,18 @@
         </div>
     </div>
 
+    <div id="batch-tab" class="tab-content">
+        <div class="add-box">
+            <h3>Batch Delete Keys by Pattern</h3>
+            <div style="margin-bottom: 10px;">
+                <label>Key Pattern: </label><br>
+                <input type="text" id="batchPattern" style="width: 400px;" placeholder="e.g. mk:login:sessions:*">
+            </div>
+            <button onclick="batchDeleteKeys()">Delete Matching Keys</button>
+            <div id="batchResult" style="margin-top: 15px;"></div>
+        </div>
+    </div>
+
 <script>
 function showTab(tab) {
     $('.tab-content').removeClass('active');
@@ -106,7 +125,10 @@ function getValue() {
     var key = $('#selectedKey').val();
     if (!key) return;
     $.get('/admin/redis/value/' + encodeURIComponent(key), function(data) {
-        $('#valueDisplay').val(data.value || '');
+        var display = 'Key: ' + data.key + '\n';
+        display += 'TTL: ' + (data.ttlText || 'Unknown') + '\n\n';
+        display += 'Value: ' + (data.value || '(null)');
+        $('#valueDisplay').val(display);
     });
 }
 
@@ -166,6 +188,28 @@ function escapeHtml(text) {
     if (!text) return '';
     return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
 }
+
+function batchDeleteKeys() {
+    var pattern = $('#batchPattern').val();
+    if (!pattern) {
+        alert('Please enter a key pattern');
+        return;
+    }
+    if (!confirm('Delete all keys matching: ' + pattern + '?')) return;
+    
+    $.ajax({
+        url: '/admin/redis/keys?pattern=' + encodeURIComponent(pattern),
+        type: 'DELETE',
+        success: function(data) {
+            var msg = 'Deleted ' + (data.deleted || 0) + ' key(s)';
+            $('#batchResult').html('<span style="color:green">' + msg + '</span>');
+        },
+        error: function() {
+            $('#batchResult').html('<span style="color:red">Delete failed</span>');
+        }
+    });
+}
 </script>
+</div>
 </body>
 </html>

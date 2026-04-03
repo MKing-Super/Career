@@ -5,6 +5,13 @@
     <title>Work Admin</title>
     <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <style>
+        body { margin: 0; font-family: Arial, sans-serif; }
+        .nav-tabs { background: #f5f5f5; padding: 10px 20px; border-bottom: 1px solid #ddd; }
+        .nav-tabs a { margin-right: 15px; padding: 8px 15px; text-decoration: none; color: #333; background: white; border: 1px solid #ddd; border-radius: 4px; }
+        .nav-tabs a:hover { background: #e0e0e0; }
+        .nav-tabs a.active { background: #3498db; color: white; border-color: #3498db; }
+        .content { padding: 20px; }
+        .user-info { position: fixed; top: 10px; right: 10px; background: #f0f0f0; padding: 10px; border: 1px solid #ccc; z-index: 100; }
         .redis-section { margin-top: 30px; padding: 15px; border: 1px solid #ccc; }
         .key-list { max-height: 200px; overflow-y: auto; margin: 10px 0; }
         .key-item { cursor: pointer; padding: 5px; margin: 2px; background: #f0f0f0; display: inline-block; }
@@ -12,54 +19,50 @@
     </style>
 </head>
 <body>
-<div style="position: fixed; top: 10px; right: 10px; background: #f0f0f0; padding: 10px; border: 1px solid #ccc;">
+<div class="user-info">
     <span th:if="${username}">
         Logged in: <strong th:text="${username}"></strong>
-        | Roles: <span th:text="${roles}"></span>
     </span>
     <span th:unless="${username}">Not logged in</span>
 </div>
 
-<h1>Work Management</h1>
+<div class="nav-tabs">
+    <a href="/admin/home" th:class="${#httpServletRequest.requestURI == '/admin/home' ? 'active' : ''}">Home</a>
+    <a href="/admin/redis" th:class="${#httpServletRequest.requestURI == '/admin/redis' ? 'active' : ''}">Redis</a>
+    <a href="/netty" th:class="${#httpServletRequest.requestURI == '/netty' ? 'active' : ''}">Netty</a>
+    <a href="/test" th:class="${#httpServletRequest.requestURI == '/test' ? 'active' : ''}">Test</a>
+</div>
 
-<table border="1">
-    <tr>
-        <th>ID</th>
-        <th>Name</th>
-        <th>Description</th>
-        <th>Create Time</th>
-    </tr>
-    <tr th:each="work : ${works}">
-        <td th:text="${work.id}"></td>
-        <td th:text="${work.name}"></td>
-        <td th:text="${work.description}"></td>
-        <td th:text="${#dates.format(work.createTime, 'yyyy-MM-dd HH:mm')}"></td>
-    </tr>
-</table>
+<div class="content">
+    <h1>Work Management</h1>
 
-<h2>Add New Work</h2>
-<form th:action="@{/admin/work/add}" th:object="${newWork}" method="post">
-    <div>
-        <label>Name: </label>
-        <input type="text" th:field="*{name}" required>
-    </div>
-    <div>
-        <label>Description: </label>
-        <input type="text" th:field="*{description}">
-    </div>
-    <button type="submit">Add Work</button>
-</form>
+    <table border="1">
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Create Time</th>
+        </tr>
+        <tr th:each="work : ${works}">
+            <td th:text="${work.id}"></td>
+            <td th:text="${work.name}"></td>
+            <td th:text="${work.description}"></td>
+            <td th:text="${#dates.format(work.createTime, 'yyyy-MM-dd HH:mm')}"></td>
+        </tr>
+    </table>
 
-<div class="redis-section">
-    <h2>Redis Key Query</h2>
-    <input type="text" id="keyPattern" placeholder="Key pattern (e.g. *)" value="*">
-    <button onclick="searchKeys()">Search Keys</button>
-    <div id="keysResult" class="key-list"></div>
-    <div id="valueResult" style="margin-top: 10px;">
-        <input type="text" id="selectedKey" placeholder="Selected key" readonly>
-        <button onclick="getValue()">Get Value</button>
-        <pre id="valueDisplay" style="background: #f5f5f5; padding: 10px; margin-top: 5px;"></pre>
-    </div>
+    <h2>Add New Work</h2>
+    <form th:action="@{/admin/work/add}" th:object="${newWork}" method="post">
+        <div>
+            <label>Name: </label>
+            <input type="text" th:field="*{name}" required>
+        </div>
+        <div>
+            <label>Description: </label>
+            <input type="text" th:field="*{description}">
+        </div>
+        <button type="submit">Add Work</button>
+    </form>
 </div>
 
 <script>

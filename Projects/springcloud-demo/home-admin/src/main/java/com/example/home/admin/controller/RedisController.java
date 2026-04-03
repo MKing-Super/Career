@@ -43,6 +43,12 @@ public class RedisController {
         return homeServiceFeign.deleteRedisKey(key);
     }
 
+    @DeleteMapping("/keys")
+    @ResponseBody
+    public Map<String, Object> deleteKeysByPattern(@RequestParam String pattern) {
+        return homeServiceFeign.deleteRedisKeysByPattern(pattern);
+    }
+
     @PostMapping("/value")
     @ResponseBody
     public Map<String, Object> setValue(@RequestParam String key, @RequestParam String value) {

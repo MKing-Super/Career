@@ -27,9 +27,12 @@ public class RedisController {
     @GetMapping("/value/{key}")
     public Map<String, Object> getValue(@PathVariable String key) {
         String value = homeService.getValue(key);
+        Long ttl = homeService.getKeyTtl(key);
         Map<String, Object> result = new HashMap<>();
         result.put("key", key);
         result.put("value", value);
+        result.put("ttl", ttl);
+        result.put("ttlText", formatTtl(ttl));
         return result;
     }
 
@@ -42,6 +45,15 @@ public class RedisController {
         return result;
     }
 
+    @DeleteMapping("/keys")
+    public Map<String, Object> deleteKeysByPattern(@RequestParam String pattern) {
+        Long deleted = homeService.deleteKeysByPattern(pattern);
+        Map<String, Object> result = new HashMap<>();
+        result.put("pattern", pattern);
+        result.put("deleted", deleted);
+        return result;
+    }
+
     @PostMapping("/value")
     public Map<String, Object> setValue(@RequestParam String key, @RequestParam String value) {
         homeService.setValue(key, value);
@@ -50,5 +62,21 @@ public class RedisController {
         result.put("value", value);
         result.put("success", true);
         return result;
+    }
+
+    private String formatTtl(Long ttl) {
+        if (ttl == null || ttl < 0) {
+            return "No expiration";
+        } else if (ttl == 0) {
+            return "Expired";
+        } else if (ttl < 60) {
+            return ttl + " seconds";
+        } else if (ttl < 3600) {
+            return (ttl / 60) + " minutes";
+        } else if (ttl < 86400) {
+            return (ttl / 3600) + " hours";
+        } else {
+            return (ttl / 86400) + " days";
+        }
     }
 }

@@ -32,6 +32,9 @@ public interface HomeServiceFeign {
     @DeleteMapping("/redis/key/{key}")
     Map<String, Object> deleteRedisKey(@PathVariable("key") String key);
 
+    @DeleteMapping("/redis/keys")
+    Map<String, Object> deleteRedisKeysByPattern(@RequestParam("pattern") String pattern);
+
     @PostMapping("/redis/value")
     Map<String, Object> setRedisValue(@RequestParam("key") String key, @RequestParam("value") String value);
 }

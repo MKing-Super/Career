@@ -52,4 +52,16 @@ public class HomeService {
     public Boolean deleteKey(String key) {
         return stringRedisTemplate.delete(key);
     }
+
+    public Long deleteKeysByPattern(String pattern) {
+        Set<String> keys = stringRedisTemplate.keys(pattern);
+        if (keys != null && !keys.isEmpty()) {
+            return stringRedisTemplate.delete(keys);
+        }
+        return 0L;
+    }
+
+    public Long getKeyTtl(String key) {
+        return stringRedisTemplate.getExpire(key);
+    }
 }
