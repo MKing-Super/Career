@@ -1,8 +1,15 @@
 spring:
   profiles:
     active: dev
-    #active: local
-    #active: localgateway
+  datasource:
+    url: jdbc:mysql://localhost:3306/home?useSSL=false&characterEncoding=utf8
+    username: root
+    password: 123
+    driver-class-name: com.mysql.jdbc.Driver
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema-home.sql
 
 logging:
   file:

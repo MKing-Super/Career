@@ -1,7 +1,9 @@
 package com.example.home.service;
 
 import com.example.home.mapper.HomeMapper;
+import com.example.home.mapper.UserMapper;
 import com.example.home.model.Home;
+import com.example.home.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -15,6 +17,9 @@ public class HomeService {
     private HomeMapper workMapper;
 
     @Autowired
+    private UserMapper userMapper;
+
+    @Autowired
     private StringRedisTemplate stringRedisTemplate;
 
     public List<Home> getAllWorks() {
@@ -23,6 +28,10 @@ public class HomeService {
 
     public void addWork(Home work) {
         workMapper.insert(work);
+    }
+
+    public User getUserByUsername(String username) {
+        return userMapper.findByUsername(username);
     }
 
     public Set<String> getAllKeys(String pattern) {

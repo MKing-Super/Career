@@ -1,9 +1,9 @@
 server:
-  port: 9004
+  port: 9010
 
 spring:
   application:
-    name: life-admin
+    name: admin-portal
   thymeleaf:
     cache: false
     prefix: classpath:/templates/
@@ -16,13 +16,13 @@ spring:
     cluster:
       nodes: 10.100.210.165:7001,10.100.210.165:7002,10.100.210.165:7003,10.100.210.166:7001,10.100.210.166:7002,10.100.210.166:7003
 
-logging:
-  file:
-    name: D:/mk-logs/life-admin.log
-  level:
-    root: INFO
-
 eureka:
   client:
     service-url:
       defaultZone: http://localhost:9100/eureka/
+
+logging:
+  file:
+    name: D:/mk-logs/admin-portal.log
+  level:
+    root: INFO

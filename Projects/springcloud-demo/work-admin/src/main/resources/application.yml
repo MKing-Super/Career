@@ -8,6 +8,13 @@ spring:
     cache: false
     prefix: classpath:/templates/
     suffix: .html
+  session:
+    store-type: redis
+    redis:
+      namespace: mk:login
+  redis:
+    cluster:
+      nodes: 10.100.210.165:7001,10.100.210.165:7002,10.100.210.165:7003,10.100.210.166:7001,10.100.210.166:7002,10.100.210.166:7003
 
 logging:
   file:

@@ -12,6 +12,14 @@
     </style>
 </head>
 <body>
+<div style="position: fixed; top: 10px; right: 10px; background: #f0f0f0; padding: 10px; border: 1px solid #ccc;">
+    <span th:if="${username}">
+        Logged in: <strong th:text="${username}"></strong>
+        | Roles: <span th:text="${roles}"></span>
+    </span>
+    <span th:unless="${username}">Not logged in</span>
+</div>
+
 <h1>Work Management</h1>
 
 <table border="1">
