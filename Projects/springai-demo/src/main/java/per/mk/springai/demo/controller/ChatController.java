@@ -1,28 +1,34 @@
 package per.mk.springai.demo.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.ResponseBody;
 import reactor.core.publisher.Flux;
 
 @RequiredArgsConstructor
-@RestController
-@RequestMapping("/ai")
+@Controller
+@Slf4j
 public class ChatController {
 
     private final ChatClient chatClient;
 
-    // 注意看返回值，是Flux<String>，也就是流式结果，另外需要设定响应类型和编码，不然前端会乱码
-    @RequestMapping(value = "/chat", produces = "text/html;charset=UTF-8")
-    public Flux<String> chat(@RequestParam(defaultValue = "讲个笑话") String prompt) {
-        return chatClient
-                .prompt(prompt)
-                .stream() // 流式调用
-                .content();
+    @GetMapping("/")
+    public String index() {
+        return "index";
     }
 
-
+    @GetMapping(value = "/chat", produces = "text/event-stream;charset=UTF-8")
+    @ResponseBody
+    public Flux<String> chat(@RequestParam(defaultValue = "讲个笑话") String prompt) {
+        log.info("用户问题: {}", prompt);
+        return chatClient
+                .prompt(prompt)
+                .stream()
+                .content();
+    }
 
 }

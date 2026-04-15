@@ -4,11 +4,16 @@ spring:
   ai:
     openai:
       base-url: https://opencode.ai/zen
-      api-key:  # 你的api key
+      api-key:
       chat:
         options:
           model: big-pickle
-          temperature: 0.8 #模型温度，影响模型生成结果的随机性，越小越稳定
+          temperature: 0.8
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
