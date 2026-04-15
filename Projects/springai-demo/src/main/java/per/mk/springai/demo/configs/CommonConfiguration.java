@@ -12,6 +12,8 @@ public class CommonConfiguration {
     @Bean
     public ChatClient chatClient(OpenAiChatModel model) {
         return ChatClient.builder(model)
+                .defaultSystem("你的名字叫阿坤。")
+                .defaultAdvisors(new SimpleLoggerAdvisor())
                 .build();
 
     }
