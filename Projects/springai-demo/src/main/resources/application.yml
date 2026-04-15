@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: springai-demo
+  ai:
+    openai:
+      base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
+      api-key:  #在这里写你自己申请的 API-Key
+      chat:
+        options:
+          model: zen-model
+          temperature: 0.8 #模型温度，影响模型生成结果的随机性，越小越稳定
+      embedding:
+        options:
+          model: text-embedding-v3
+          dimensions: 1024
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/home?useSSL=false&characterEncoding=utf8
+    username: root
+    password: 123
+logging:
+  level:
+    org.springframework.ai: debug # AI对话的日志级别
+    com.xbs.springaiopenai: debug # 本项目的日志级别
+server:
+  port: 8087
+mybatis:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

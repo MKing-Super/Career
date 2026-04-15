@@ -1,4 +1,4 @@
-package per.mk.springai.springaidemo;
+package per.mk.springai.demo;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
