@@ -21,7 +21,7 @@ public class ChatController {
         return "index";
     }
 
-    @GetMapping(value = "/chat", produces = "text/event-stream;charset=UTF-8")
+    @GetMapping(value = "/ai/chat", produces = "text/event-stream;charset=UTF-8")
     @ResponseBody
     public Flux<String> chat(@RequestParam(defaultValue = "讲个笑话") String prompt) {
         log.info("用户问题: {}", prompt);
