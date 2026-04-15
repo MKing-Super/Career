@@ -24,6 +24,7 @@ logging:
   level:
     org.springframework.ai: debug # AI对话的日志级别
     com.xbs.springaiopenai: debug # 本项目的日志级别
+    per.mk.springai.demo: debug
 server:
   port: 8090
 mybatis:
