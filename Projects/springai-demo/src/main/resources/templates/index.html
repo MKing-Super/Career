@@ -42,7 +42,7 @@
         .welcome p { color: #888; font-size: 15px; }
     </style>
 </head>
-<body>
+<body onload="initChat()">
     <div class="chat-messages" id="messages">
         <div class="welcome">
             <h1>你好，我是 AI 助手</h1>
@@ -59,17 +59,22 @@
 
     <script>
         let chatHistory = [];
+        let chatId = '';
+
+        async function initChat() {
+            try {
+                const res = await fetch('/ai/new');
+                chatId = await res.text();
+            } catch (err) {
+                console.error('初始化会话失败', err);
+            }
+        }
 
         function handleKey(e) {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 send();
             }
-        }
-
-        function clearChat() {
-            document.getElementById('messages').innerHTML = '<div class="welcome"><h1>你好，我是 AI 助手</h1><p>有什么我可以帮助你的吗？</p></div>';
-            chatHistory = [];
         }
 
         async function send() {
@@ -87,7 +92,7 @@
             const contentDiv = aiMessage.querySelector('.message-content');
             
             try {
-                const res = await fetch('/ai/chat?prompt=' + encodeURIComponent(prompt));
+                const res = await fetch('/ai/chat?prompt=' + encodeURIComponent(prompt) + '&chatId=' + chatId);
                 const reader = res.body.getReader();
                 const decoder = new TextDecoder();
                 let fullText = '';
