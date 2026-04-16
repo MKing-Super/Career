@@ -4,7 +4,7 @@ spring:
   ai:
     openai:
       base-url: https://opencode.ai/zen
-      api-key:
+      api-key: ${OPENAI_API_KEY}
       chat:
         options:
           model: big-pickle
@@ -17,7 +17,7 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/home?useSSL=false&characterEncoding=utf8
+    url: jdbc:mysql://localhost:3306/work?useSSL=false&characterEncoding=utf8
     username: root
     password: 123
 logging:
