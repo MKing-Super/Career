@@ -91,30 +91,19 @@
                 const reader = res.body.getReader();
                 const decoder = new TextDecoder();
                 let fullText = '';
-                let buffer = '';
                 
                 while (true) {
                     const { done, value } = await reader.read();
                     if (done) break;
-                    buffer += decoder.decode(value, { stream: true });
-                    const lines = buffer.split('\n');
-                    buffer = lines.pop();
-                    for (const line of lines) {
-                        if (line.startsWith('data:')) {
-                            fullText += line.slice(5).trim() + '\n';
-                            if (typeof marked !== 'undefined') {
-                                contentDiv.innerText = fullText;
-                            } else {
-                                contentDiv.innerText = fullText;
-                            }
-                            messages.scrollTop = messages.scrollHeight;
-                        }
+                    const chunk = decoder.decode(value, { stream: true });
+                    fullText += chunk;
+                    if (typeof marked !== 'undefined') {
+                        contentDiv.innerHTML = marked.parse(fullText);
+                    } else {
+                        contentDiv.innerText = fullText;
                     }
+                    messages.scrollTop = messages.scrollHeight;
                 }
-                if (buffer.startsWith('data:')) {
-                    fullText += buffer.slice(5).trim();
-                }
-                fullText = fullText.trim();
                 if (typeof marked !== 'undefined') {
                     contentDiv.innerHTML = marked.parse(fullText);
                 } else {
