@@ -134,9 +134,8 @@ public class ChatController {
                     .stream()
                     .content();
         } else {
-            // 多轮对话，携带历史上下文
+            // 多轮对话，携带历史上下文（从MySQL读取）
             flux = chatClient.prompt()
-                    .advisors(a -> a.param("chat_memory_conversation_id", finalSessionId))
                     .messages(historyMessages)
                     .user(prompt)
                     .stream()
