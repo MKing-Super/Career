@@ -6,82 +6,169 @@
     <title>AI Chat</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
+        :root {
+            --bg-primary: #0c0c0c;
+            --bg-secondary: #1a1a1a;
+            --bg-tertiary: #2a2a2a;
+            --bg-input: #2e2e2e;
+            --border-color: #333;
+            --text-primary: #fff;
+            --text-secondary: #888;
+            --accent: #543add;
+            --accent-hover: #6b5ae9;
+            --accent-disabled: #444;
+            --danger: #ff4444;
+            --code-bg: #2e2e2e;
+        }
+
+        .theme-light {
+            --bg-primary: #f5f5f5;
+            --bg-secondary: #fff;
+            --bg-tertiary: #e0e0e0;
+            --bg-input: #fff;
+            --border-color: #ddd;
+            --text-primary: #333;
+            --text-secondary: #666;
+            --accent: #543add;
+            --accent-hover: #6b5ae9;
+            --accent-disabled: #ccc;
+            --danger: #ff4444;
+            --code-bg: #e8e8e8;
+        }
+
+        .theme-blue {
+            --bg-primary: #0a1929;
+            --bg-secondary: #0d2137;
+            --bg-tertiary: #143352;
+            --bg-input: #143352;
+            --border-color: #1a4a6e;
+            --text-primary: #e6f1ff;
+            --text-secondary: #8b9dc3;
+            --accent: #64ffda;
+            --accent-hover: #80ffd4;
+            --accent-disabled: #1a4a6e;
+            --danger: #ff6b6b;
+            --code-bg: #143352;
+        }
+
+        .theme-green {
+            --bg-primary: #0a1612;
+            --bg-secondary: #0f231c;
+            --bg-tertiary: #153028;
+            --bg-input: #153028;
+            --border-color: #1a4030;
+            --text-primary: #e6ffe6;
+            --text-secondary: #8bc9a3;
+            --accent: #00d26a;
+            --accent-hover: #00e676;
+            --accent-disabled: #1a4030;
+            --danger: #ff6b6b;
+            --code-bg: #153028;
+        }
+
+        .theme-pink {
+            --bg-primary: #fff0f5;
+            --bg-secondary: #fff;
+            --bg-tertiary: #ffd6e0;
+            --bg-input: #fff;
+            --border-color: #ffc0cb;
+            --text-primary: #5c3a4a;
+            --text-secondary: #8b6b7a;
+            --accent: #ff69b4;
+            --accent-hover: #ff85c1;
+            --accent-disabled: #e0c0cb;
+            --danger: #ff6b6b;
+            --code-bg: #ffe4eb;
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0c0c0c; color: #fff; height: 100vh; display: flex; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg-primary); color: var(--text-primary); height: 100vh; display: flex; }
         
-        .sidebar { width: 0; background: #1a1a1a; border-right: 1px solid #333; display: flex; flex-direction: column; flex-shrink: 0; overflow: hidden; transition: width 0.3s; }
+        .sidebar { width: 0; background: var(--bg-secondary); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; flex-shrink: 0; overflow: hidden; transition: width 0.3s; }
         .sidebar.show { width: 280px; }
-        .sidebar-header { padding: 20px; border-bottom: 1px solid #333; white-space: nowrap; }
-        .new-chat-btn { width: 100%; background: #543add; border: none; color: #fff; padding: 12px; border-radius: 8px; cursor: pointer; font-size: 14px; }
-        .new-chat-btn:hover { background: #6b5ae9; }
+        .sidebar-header { padding: 20px; border-bottom: 1px solid var(--border-color); white-space: nowrap; background: var(--bg-secondary); }
+        .new-chat-btn { width: 100%; background: var(--accent); border: none; color: var(--bg-primary); padding: 12px; border-radius: 8px; cursor: pointer; font-size: 14px; }
+        .new-chat-btn:hover { background: var(--accent-hover); }
         
-        .session-list { flex: 1; overflow-y: auto; padding: 10px; }
-        .session-item { padding: 12px; border-radius: 8px; cursor: pointer; margin-bottom: 4px; display: flex; align-items: center; justify-content: space-between; }
-        .session-item:hover { background: #2a2a2a; }
-        .session-item.active { background: #333; }
-        .session-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; }
+        .session-list { flex: 1; overflow-y: auto; padding: 10px; background: var(--bg-secondary); }
+        .session-item { padding: 12px; border-radius: 8px; cursor: pointer; margin-bottom: 4px; display: flex; align-items: center; justify-content: space-between; background: var(--bg-secondary); }
+        .session-item:hover { background: var(--bg-tertiary); }
+        .session-item.active { background: var(--bg-tertiary); }
+        .session-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; color: var(--text-primary); }
         .session-actions { display: none; gap: 4px; }
         .session-item:hover .session-actions { display: flex; }
-        .session-action-btn { background: none; border: none; color: #888; cursor: pointer; padding: 4px; font-size: 12px; }
-        .session-action-btn:hover { color: #fff; }
-        .session-action-btn.delete:hover { color: #ff4444; }
+        .session-action-btn { background: none; border: none; color: var(--text-secondary); cursor: pointer; padding: 4px; font-size: 12px; }
+        .session-action-btn:hover { color: var(--text-primary); }
+        .session-action-btn.delete:hover { color: var(--danger); }
         
         .main-content { flex: 1; display: flex; flex-direction: column; }
         
-        .chat-header { padding: 16px 20px; border-bottom: 1px solid #333; display: flex; align-items: center; justify-content: space-between; }
-        .toggle-sidebar-btn { background: none; border: none; color: #888; cursor: pointer; font-size: 20px; padding: 4px 8px; }
-        .toggle-sidebar-btn:hover { color: #fff; }
+        .chat-header { padding: 16px 20px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; }
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        .toggle-sidebar-btn { background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 20px; padding: 4px 8px; }
+        .toggle-sidebar-btn:hover { color: var(--text-primary); }
         .chat-title { font-size: 16px; font-weight: 500; }
-        .current-session-name { color: #888; font-size: 14px; }
+        .current-session-name { color: var(--text-secondary); font-size: 14px; }
+        
+        .theme-switcher { position: relative; }
+        .theme-btn { background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 18px; padding: 4px 8px; }
+        .theme-btn:hover { color: var(--text-primary); }
+        .theme-dropdown { display: none; position: absolute; top: 100%; right: 0; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px; z-index: 100; min-width: 120px; }
+        .theme-dropdown.show { display: block; }
+        .theme-option { display: flex; align-items: center; gap: 8px; padding: 8px; border-radius: 4px; cursor: pointer; font-size: 14px; }
+        .theme-option:hover { background: var(--bg-tertiary); }
+        .theme-option.active { background: var(--bg-tertiary); }
+        .theme-option.active .theme-color { border-color: var(--accent); box-shadow: 0 0 4px var(--accent); }
+        .theme-color { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--border-color); }
         
         .chat-messages { flex: 1; overflow-y: auto; padding: 20px; }
         .message { margin-bottom: 20px; display: flex; gap: 16px; }
         .message.user { justify-content: flex-end; }
         .message-avatar { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
-        .message.user .message-avatar { background: #543add; order: 1; }
-        .message.ai .message-avatar { background: #2e2e2e; }
+        .message.user .message-avatar { background: var(--accent); color: var(--bg-primary); order: 1; }
+        .message.ai .message-avatar { background: var(--bg-tertiary); }
         .message-content { max-width: 700px; font-size: 15px; line-height: 1.6; }
         .message-content pre { white-space: pre-wrap; white-space: -moz-pre-wrap; white-space: -o-pre-wrap; word-wrap: break-word; }
         .message-content p { margin-bottom: 12px; }
-        .message-content h1, .message-content h2, .message-content h3 { color: #fff; margin: 16px 0 8px; }
-        .message-content h1 { font-size: 24px; border-bottom: 1px solid #333; padding-bottom: 8px; }
+        .message-content h1, .message-content h2, .message-content h3 { color: var(--text-primary); margin: 16px 0 8px; }
+        .message-content h1 { font-size: 24px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; }
         .message-content h2 { font-size: 20px; }
         .message-content h3 { font-size: 16px; }
-        .message-content code { background: #2e2e2e; padding: 2px 6px; border-radius: 4px; font-family: monospace; }
-        .message-content pre { background: #2e2e2e; padding: 16px; border-radius: 8px; overflow-x: auto; margin: 12px 0; }
+        .message-content code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: monospace; }
+        .message-content pre { background: var(--code-bg); padding: 16px; border-radius: 8px; overflow-x: auto; margin: 12px 0; }
         .message-content pre code { background: none; padding: 0; }
         .message-content ul, .message-content ol { padding-left: 20px; margin: 12px 0; }
-        .message-content hr { border: none; border-top: 1px solid #333; margin: 16px 0; }
+        .message-content hr { border: none; border-top: 1px solid var(--border-color); margin: 16px 0; }
         
-        .input-container { padding: 20px 40px 30px; border-top: 1px solid #2e2e2e; }
-        .input-wrapper { background: #2e2e2e; border-radius: 12px; padding: 12px 16px; display: flex; gap: 12px; align-items: flex-end; }
-        .input-wrapper textarea { flex: 1; background: none; border: none; color: #fff; font-size: 15px; resize: none; outline: none; font-family: inherit; max-height: 200px; line-height: 1.5; }
-        .input-wrapper textarea::placeholder { color: #666; }
-        .send-btn { background: #543add; border: none; color: #fff; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; }
-        .send-btn:hover { background: #6b5ae9; }
-        .send-btn:disabled { background: #444; cursor: not-allowed; }
+        .input-container { padding: 20px 40px 30px; border-top: 1px solid var(--border-color); }
+        .input-wrapper { background: var(--bg-input); border-radius: 12px; padding: 12px 16px; display: flex; gap: 12px; align-items: flex-end; }
+        .input-wrapper textarea { flex: 1; background: none; border: none; color: var(--text-primary); font-size: 15px; resize: none; outline: none; font-family: inherit; max-height: 200px; line-height: 1.5; }
+        .input-wrapper textarea::placeholder { color: var(--text-secondary); }
+        .send-btn { background: var(--accent); border: none; color: var(--bg-primary); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; }
+        .send-btn:hover { background: var(--accent-hover); }
+        .send-btn:disabled { background: var(--accent-disabled); cursor: not-allowed; }
         
         .welcome { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
         .welcome h1 { font-size: 36px; font-weight: 500; margin-bottom: 16px; }
-        .welcome p { color: #888; font-size: 15px; }
+        .welcome p { color: var(--text-secondary); font-size: 15px; }
         
         .session-list .session-item, .session-list .new-chat-btn { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         
-        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); align-items: center; justify-content: center; z-index: 1000; }
+        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 1000; }
         .modal.show { display: flex; }
-        .modal-content { background: #1a1a1a; padding: 24px; border-radius: 12px; width: 400px; }
+        .modal-content { background: var(--bg-secondary); padding: 24px; border-radius: 12px; width: 400px; }
         .modal-title { font-size: 18px; margin-bottom: 16px; }
-        .modal-input { width: 100%; background: #333; border: 1px solid #444; color: #fff; padding: 12px; border-radius: 8px; font-size: 14px; margin-bottom: 16px; }
+        .modal-input { width: 100%; background: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-primary); padding: 12px; border-radius: 8px; font-size: 14px; margin-bottom: 16px; }
         .modal-buttons { display: flex; gap: 12px; justify-content: flex-end; }
         .modal-btn { padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; font-size: 14px; }
-        .modal-btn.cancel { background: #333; color: #fff; }
-        .modal-btn.confirm { background: #543add; color: #fff; }
+        .modal-btn.cancel { background: var(--bg-tertiary); color: var(--text-primary); }
+        .modal-btn.confirm { background: var(--accent); color: var(--bg-primary); }
         
-        .time-badge { font-size: 11px; color: #666; margin-left: 8px; }
+        .time-badge { font-size: 11px; color: var(--text-secondary); margin-left: 8px; }
         
         .message-footer { display: flex; gap: 8px; margin-top: 8px; }
-        .export-btn { background: #333; border: none; color: #888; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; }
-        .export-btn:hover { background: #444; color: #fff; }
+        .export-btn { background: var(--bg-tertiary); border: none; color: var(--text-secondary); padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+        .export-btn:hover { background: var(--border-color); color: var(--text-primary); }
     </style>
 </head>
 <body onload="init()">
@@ -94,10 +181,37 @@
     
     <div class="main-content">
         <div class="chat-header">
-            <button class="toggle-sidebar-btn" onclick="toggleSidebar()" title="切换侧边栏">☰</button>
-            <div>
-                <div class="chat-title">AI 助手</div>
-                <div class="current-session-name" id="currentSessionName">新会话</div>
+            <div class="header-left">
+                <button class="toggle-sidebar-btn" onclick="toggleSidebar()" title="切换侧边栏">☰</button>
+                <div>
+                    <div class="chat-title">AI 助手</div>
+                    <div class="current-session-name" id="currentSessionName">新会话</div>
+                </div>
+            </div>
+            <div class="theme-switcher">
+                <button class="theme-btn" onclick="toggleThemeDropdown()">🎨</button>
+                <div class="theme-dropdown" id="themeDropdown">
+                    <div class="theme-option" data-theme="dark" onclick="setTheme('dark')">
+                        <div class="theme-color" style="background: #0c0c0c;"></div>
+                        <span>深色</span>
+                    </div>
+                    <div class="theme-option" data-theme="light" onclick="setTheme('light')">
+                        <div class="theme-color" style="background: #f5f5f5;"></div>
+                        <span>浅色</span>
+                    </div>
+                    <div class="theme-option" data-theme="blue" onclick="setTheme('blue')">
+                        <div class="theme-color" style="background: #0a1929;"></div>
+                        <span>蓝色</span>
+                    </div>
+                    <div class="theme-option" data-theme="green" onclick="setTheme('green')">
+                        <div class="theme-color" style="background: #0a1612;"></div>
+                        <span>绿色</span>
+                    </div>
+                    <div class="theme-option" data-theme="pink" onclick="setTheme('pink')">
+                        <div class="theme-color" style="background: #fff0f5;"></div>
+                        <span>粉色</span>
+                    </div>
+                </div>
             </div>
         </div>
         
@@ -130,13 +244,50 @@
     <script>
         let currentSessionId = '';
         let sidebarVisible = false;
+        let renameTargetId = '';
 
         function toggleSidebar() {
             sidebarVisible = !sidebarVisible;
             document.querySelector('.sidebar').classList.toggle('show', sidebarVisible);
         }
 
+        function toggleThemeDropdown() {
+            document.getElementById('themeDropdown').classList.toggle('show');
+        }
+
+        function setTheme(theme) {
+            document.body.className = theme === 'dark' ? '' : 'theme-' + theme;
+            localStorage.setItem('chatTheme', theme);
+            updateThemeOptions();
+            toggleThemeDropdown();
+        }
+
+        function updateThemeOptions() {
+            const currentTheme = localStorage.getItem('chatTheme') || 'dark';
+            document.querySelectorAll('.theme-option').forEach(opt => {
+                opt.classList.remove('active');
+                if (opt.dataset.theme === currentTheme) {
+                    opt.classList.add('active');
+                }
+            });
+        }
+
+        function initTheme() {
+            const theme = localStorage.getItem('chatTheme') || 'dark';
+            if (theme !== 'dark') {
+                document.body.className = 'theme-' + theme;
+            }
+            updateThemeOptions();
+        }
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.theme-switcher')) {
+                document.getElementById('themeDropdown').classList.remove('show');
+            }
+        });
+
         async function init() {
+            initTheme();
             await loadSessions();
         }
 
@@ -305,7 +456,7 @@
                 
                 await loadSessions();
             } catch (err) {
-                contentDiv.innerHTML = '<p style="color: #ff4444;">请求出错，请重试</p>';
+                contentTextDiv.innerHTML = '<p style="color: #ff4444;">请求出错，请重试</p>';
             }
             
             sendBtn.disabled = false;
