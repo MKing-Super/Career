@@ -24,16 +24,6 @@ public class ChatController {
     private final ChatHistoryService chatHistoryService;
 
     /**
-     * 返回聊天页面
-     *
-     * @return 视图名称
-     */
-    @GetMapping("/")
-    public String index() {
-        return "index";
-    }
-
-    /**
      * 获取所有未删除的会话列表
      *
      * @return 会话列表
