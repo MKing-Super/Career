@@ -78,6 +78,10 @@
         .modal-btn.confirm { background: #543add; color: #fff; }
         
         .time-badge { font-size: 11px; color: #666; margin-left: 8px; }
+        
+        .message-footer { display: flex; gap: 8px; margin-top: 8px; }
+        .export-btn { background: #333; border: none; color: #888; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+        .export-btn:hover { background: #444; color: #fff; }
     </style>
 </head>
 <body onload="init()">
@@ -187,7 +191,7 @@
                     messagesDiv.innerHTML = '<div class="welcome"><h1>你好，我是 AI 助手</h1><p>有什么我可以帮助你的吗？</p></div>';
                 } else {
                     messages.forEach(msg => {
-                        addMessage(msg.role, msg.content, msg.createTime);
+                        addMessage(msg.role, msg.content, msg.createTime, true);
                     });
                     messagesDiv.scrollTop = messagesDiv.scrollHeight;
                 }
@@ -273,8 +277,8 @@
             addMessage('user', prompt);
             document.getElementById('prompt').value = '';
             
-            const aiMessage = addMessage('ai', '');
-            const contentDiv = aiMessage.querySelector('.message-content');
+            const aiMessage = addMessage('ai', '', null, false);
+            const contentTextDiv = aiMessage.querySelector('.content-text');
             
             try {
                 const res = await fetch('/ai/chat?prompt=' + encodeURIComponent(prompt) + '&sessionId=' + currentSessionId);
@@ -288,12 +292,16 @@
                     const chunk = decoder.decode(value, { stream: true });
                     fullText += chunk;
                     if (typeof marked !== 'undefined') {
-                        contentDiv.innerHTML = marked.parse(fullText);
+                        contentTextDiv.innerHTML = marked.parse(fullText);
                     } else {
-                        contentDiv.innerText = fullText;
+                        contentTextDiv.innerText = fullText;
                     }
+                    aiMessage.dataset.content = fullText;
                     messages.scrollTop = messages.scrollHeight;
                 }
+                
+                const exportBtn = aiMessage.querySelector('.export-btn');
+                if (exportBtn) exportBtn.disabled = false;
                 
                 await loadSessions();
             } catch (err) {
@@ -303,7 +311,7 @@
             sendBtn.disabled = false;
         }
 
-        function addMessage(role, content, createTime) {
+        function addMessage(role, content, createTime, enableExport = false) {
             const messages = document.getElementById('messages');
             const welcome = messages.querySelector('.welcome');
             if (welcome) welcome.remove();
@@ -319,10 +327,45 @@
             }
             
             const timeHtml = createTime ? `<span class="time-badge">${formatTime(createTime)}</span>` : '';
-            div.innerHTML = '<div class="message-avatar">' + (role === 'user' ? 'U' : 'AI') + '</div><div class="message-content">' + html + timeHtml + '</div>';
+            let footerHtml = '';
+            if (role === 'ai' || role === 'assistant') {
+                const disabled = enableExport ? '' : 'disabled';
+                footerHtml = '<div class="message-footer"><button class="export-btn" onclick="exportMarkdown(this)" ' + disabled + '>导出 MD</button></div>';
+                div.dataset.content = content || '';
+            }
+            
+            const avatarText = (role === 'user' || role === 'assistant') ? (role === 'user' ? 'U' : 'AI') : role.charAt(0).toUpperCase();
+            div.innerHTML = '<div class="message-avatar">' + avatarText + '</div><div class="message-content"><div class="content-text"></div>' + timeHtml + footerHtml + '</div>';
+            const contentTextDiv = div.querySelector('.content-text');
+            contentTextDiv.innerHTML = html;
             messages.appendChild(div);
             messages.scrollTop = messages.scrollHeight;
             return div;
+        }
+
+        function exportMarkdown(btn) {
+            const messageDiv = btn.closest('.message');
+            const content = messageDiv.dataset.content;
+            if (!content) return;
+            
+            const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'ai回复_' + formatDateTime(new Date()) + '.md';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function formatDateTime(date) {
+            return date.getFullYear() + '-' + 
+                   String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+                   String(date.getDate()).padStart(2, '0') + '_' + 
+                   String(date.getHours()).padStart(2, '0') + '-' + 
+                   String(date.getMinutes()).padStart(2, '0') + '-' + 
+                   String(date.getSeconds()).padStart(2, '0');
         }
 
         function formatTime(dateStr) {
