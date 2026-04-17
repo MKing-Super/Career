@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>天气助手 - 小天</title>
+    <style>
+        :root {
+            --bg-primary: #e8f5e9;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #c8e6c9;
+            --bg-input: #ffffff;
+            --border-color: #a5d6a7;
+            --text-primary: #1b5e20;
+            --text-secondary: #4caf50;
+            --accent: #4caf50;
+            --accent-hover: #66bb6a;
+            --accent-disabled: #c8e6c9;
+            --danger: #f44336;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg-primary); color: var(--text-primary); height: 100vh; display: flex; }
+        
+        .sidebar { width: 0; background: var(--bg-secondary); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; flex-shrink: 0; overflow: hidden; transition: width 0.3s; }
+        .sidebar.show { width: 280px; }
+        .sidebar-header { padding: 20px; border-bottom: 1px solid var(--border-color); white-space: nowrap; background: var(--bg-secondary); }
+        .new-chat-btn { width: 100%; background: var(--accent); border: none; color: #fff; padding: 12px; border-radius: 8px; cursor: pointer; font-size: 14px; }
+        .new-chat-btn:hover { background: var(--accent-hover); }
+        
+        .session-list { flex: 1; overflow-y: auto; padding: 10px; background: var(--bg-secondary); }
+        .session-item { padding: 12px; border-radius: 8px; cursor: pointer; margin-bottom: 4px; display: flex; align-items: center; justify-content: space-between; background: var(--bg-secondary); }
+        .session-item:hover { background: var(--bg-tertiary); }
+        .session-item.active { background: var(--bg-tertiary); }
+        .session-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; color: var(--text-primary); }
+        .session-actions { display: none; gap: 4px; }
+        .session-item:hover .session-actions { display: flex; }
+        .session-action-btn { background: none; border: none; color: var(--text-secondary); cursor: pointer; padding: 4px; font-size: 12px; }
+        .session-action-btn:hover { color: var(--text-primary); }
+        .session-action-btn.delete:hover { color: var(--danger); }
+        
+        .main-content { flex: 1; display: flex; flex-direction: column; }
+        
+        .chat-header { padding: 16px 20px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; background: var(--bg-secondary); }
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        .toggle-sidebar-btn { background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 20px; padding: 4px 8px; }
+        .toggle-sidebar-btn:hover { color: var(--text-primary); }
+        .chat-title { font-size: 16px; font-weight: 500; }
+        .current-session-name { color: var(--text-secondary); font-size: 14px; }
+        
+        .nav-links { display: flex; gap: 8px; }
+        .nav-link { background: var(--bg-tertiary); border: none; color: var(--text-primary); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; text-decoration: none; display: inline-block; }
+        .nav-link:hover { background: var(--accent); color: #fff; }
+        
+        .chat-messages { flex: 1; overflow-y: auto; padding: 20px; }
+        .message { margin-bottom: 20px; display: flex; gap: 16px; }
+        .message.user { justify-content: flex-end; }
+        .message-avatar { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+        .message.user .message-avatar { background: var(--accent); color: #fff; order: 1; }
+        .message.ai .message-avatar { background: var(--bg-tertiary); }
+        .message-content { max-width: 700px; font-size: 15px; line-height: 1.6; background: var(--bg-secondary); padding: 16px; border-radius: 12px; }
+        .message.user .message-content { background: var(--accent); color: #fff; }
+        
+        .input-container { padding: 20px 40px 30px; border-top: 1px solid var(--border-color); background: var(--bg-secondary); }
+        .input-wrapper { background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 12px; padding: 12px 16px; display: flex; gap: 12px; align-items: flex-end; }
+        .input-wrapper textarea { flex: 1; background: none; border: none; color: var(--text-primary); font-size: 15px; resize: none; outline: none; font-family: inherit; max-height: 200px; line-height: 1.5; }
+        .input-wrapper textarea::placeholder { color: var(--text-secondary); }
+        .send-btn { background: var(--accent); border: none; color: #fff; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; }
+        .send-btn:hover { background: var(--accent-hover); }
+        .send-btn:disabled { background: var(--accent-disabled); cursor: not-allowed; }
+        
+        .welcome { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .welcome-icon { font-size: 64px; margin-bottom: 16px; }
+        .welcome h1 { font-size: 36px; font-weight: 500; margin-bottom: 16px; color: var(--text-primary); }
+        .welcome p { color: var(--text-secondary); font-size: 15px; }
+        
+        .time-badge { font-size: 11px; color: var(--text-secondary); margin-left: 8px; }
+        
+        .message-footer { display: flex; gap: 8px; margin-top: 8px; }
+        .export-btn { background: var(--bg-tertiary); border: none; color: var(--text-secondary); padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+        .export-btn:hover { background: var(--border-color); color: var(--text-primary); }
+    </style>
+</head>
+<body onload="init()">
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <button class="new-chat-btn" onclick="createNewSession()">+ 新建会话</button>
+        </div>
+        <div class="session-list" id="sessionList"></div>
+    </div>
+    
+    <div class="main-content">
+        <div class="chat-header">
+            <div class="header-left">
+                <button class="toggle-sidebar-btn" onclick="toggleSidebar()" title="切换侧边栏">☰</button>
+                <div>
+                    <div class="chat-title">☀️ 天气助手 - 小天</div>
+                    <div class="current-session-name" id="currentSessionName">新会话</div>
+                </div>
+            </div>
+            <div class="nav-links">
+                <a href="/" class="nav-link">AI 助手</a>
+                <a href="/weather" class="nav-link">天气助手</a>
+            </div>
+        </div>
+        
+        <div class="chat-messages" id="messages">
+            <div class="welcome">
+                <div class="welcome-icon">☀️</div>
+                <h1>你好，我是天气助手小天</h1>
+                <p>你可以问我任何城市的天气情况哦！</p>
+                <p>例如：北京天气怎么样？今天上海适合出门吗？</p>
+            </div>
+        </div>
+        
+        <div class="input-container">
+            <div class="input-wrapper">
+                <textarea id="prompt" placeholder="问我天气吧...例如：北京天气" rows="1"></textarea>
+                <button class="send-btn" id="sendBtn">发送</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var currentSessionId = '';
+        var sidebarVisible = false;
+        var sessionHistory = [];
+
+        function toggleSidebar() {
+            sidebarVisible = !sidebarVisible;
+            var sidebar = document.querySelector('.sidebar');
+            if (sidebarVisible) {
+                sidebar.classList.add('show');
+            } else {
+                sidebar.classList.remove('show');
+            }
+        }
+
+        function generateSessionId() {
+            return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        function init() {
+            createNewSession();
+            document.getElementById('prompt').addEventListener('keydown', handleKey);
+            document.getElementById('sendBtn').addEventListener('click', send);
+        }
+
+        function createNewSession() {
+            currentSessionId = generateSessionId();
+            sessionHistory = [];
+            document.getElementById('currentSessionName').textContent = '新会话';
+            document.getElementById('messages').innerHTML = '<div class="welcome"><div class="welcome-icon">☀️</div><h1>你好，我是天气助手小天</h1><p>你可以问我任何城市的天气情况哦！</p><p>例如：北京天气怎么样？今天上海适合出门吗？</p></div>';
+            loadSessions();
+        }
+
+        function loadSessions() {
+            var sessions = sessionHistory.map(function(s) { return { sessionId: s.id, sessionName: s.name }; });
+            var list = document.getElementById('sessionList');
+            list.innerHTML = '';
+            sessions.forEach(function(session) {
+                var item = document.createElement('div');
+                item.className = 'session-item' + (session.sessionId === currentSessionId ? ' active' : '');
+                item.innerHTML = '<span class="session-name" onclick="selectSession(\'' + session.sessionId + '\')">' + session.sessionName + '</span>' +
+                    '<div class="session-actions"><button class="session-action-btn delete" onclick="deleteSession(\'' + session.sessionId + '\')" title="删除">✕</button></div>';
+                list.appendChild(item);
+            });
+        }
+
+        function selectSession(sessionId) {
+            currentSessionId = sessionId;
+            var session = sessionHistory.find(function(s) { return s.id === sessionId; });
+            if (session) {
+                document.getElementById('currentSessionName').textContent = session.name;
+                renderMessages(session.messages);
+            }
+            loadSessions();
+        }
+
+        function renderMessages(messages) {
+            var messagesDiv = document.getElementById('messages');
+            messagesDiv.innerHTML = '';
+            if (messages.length === 0) {
+                messagesDiv.innerHTML = '<div class="welcome"><div class="welcome-icon">☀️</div><h1>你好，我是天气助手小天</h1><p>你可以问我任何城市的天气情况哦！</p></div>';
+            } else {
+                messages.forEach(function(msg) {
+                    addMessage(msg.role, msg.content, msg.createTime, true);
+                });
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            }
+        }
+
+        function deleteSession(sessionId) {
+            event.stopPropagation();
+            sessionHistory = sessionHistory.filter(function(s) { return s.id !== sessionId; });
+            if (currentSessionId === sessionId) {
+                createNewSession();
+            } else {
+                loadSessions();
+            }
+        }
+
+        function handleKey(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                send();
+            }
+        }
+
+        function send() {
+            var promptInput = document.getElementById('prompt');
+            var prompt = promptInput.value.trim();
+            if (!prompt) return;
+            
+            var sendBtn = document.getElementById('sendBtn');
+            sendBtn.disabled = true;
+            
+            addMessage('user', prompt);
+            promptInput.value = '';
+            
+            var aiMessage = addMessage('ai', '');
+            var contentTextDiv = aiMessage.querySelector('.content-text');
+            
+            fetch('/weather/chat?prompt=' + encodeURIComponent(prompt) + '&sessionId=' + currentSessionId)
+                .then(function(res) {
+                    var reader = res.body.getReader();
+                    var decoder = new TextDecoder();
+                    var fullText = '';
+                    
+                    function read() {
+                        reader.read().then(function(result) {
+                            if (result.done) {
+                                var exportBtn = aiMessage.querySelector('.export-btn');
+                                if (exportBtn) exportBtn.disabled = false;
+                                saveToSession('assistant', fullText);
+                                loadSessions();
+                                sendBtn.disabled = false;
+                                return;
+                            }
+                            var chunk = decoder.decode(result.value, { stream: true });
+                            fullText += chunk;
+                            contentTextDiv.innerText = fullText;
+                            aiMessage.dataset.content = fullText;
+                            document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+                            read();
+                        });
+                    }
+                    read();
+                })
+                .catch(function(err) {
+                    contentTextDiv.innerHTML = '<p style="color: #f44336;">请求出错，请重试</p>';
+                    sendBtn.disabled = false;
+                });
+        }
+
+        function saveToSession(role, content) {
+            var session = sessionHistory.find(function(s) { return s.id === currentSessionId; });
+            if (!session) {
+                session = { id: currentSessionId, name: '天气会话', messages: [] };
+                sessionHistory.unshift(session);
+            }
+            session.messages.push({ role: role, content: content, createTime: new Date().toISOString() });
+            if (session.messages.length === 1) {
+                session.name = content.substring(0, 20).replace(/\n/g, ' ') + '...';
+            }
+        }
+
+        function addMessage(role, content, createTime, enableExport) {
+            var messages = document.getElementById('messages');
+            var welcome = messages.querySelector('.welcome');
+            if (welcome) welcome.remove();
+            
+            var div = document.createElement('div');
+            div.className = 'message ' + role;
+            
+            var timeHtml = createTime ? '<span class="time-badge">' + formatTime(createTime) + '</span>' : '';
+            var footerHtml = '';
+            if (role === 'ai') {
+                var disabled = enableExport ? '' : 'disabled';
+                footerHtml = '<div class="message-footer"><button class="export-btn" ' + disabled + '>导出</button></div>';
+                div.dataset.content = content || '';
+            }
+            
+            var avatarText = role === 'user' ? 'U' : '天';
+            div.innerHTML = '<div class="message-avatar">' + avatarText + '</div><div class="message-content"><div class="content-text">' + content + '</div>' + timeHtml + footerHtml + '</div>';
+            
+            if (footerHtml) {
+                var btn = div.querySelector('.export-btn');
+                btn.addEventListener('click', function() { exportMarkdown(div); });
+            }
+            
+            messages.appendChild(div);
+            messages.scrollTop = messages.scrollHeight;
+            
+            if (role === 'user') {
+                saveToSession(role, content);
+            }
+            
+            return div;
+        }
+
+        function exportMarkdown(messageDiv) {
+            var content = messageDiv.dataset.content;
+            if (!content) return;
+            
+            var blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = '天气回复_' + formatDateTime(new Date()) + '.md';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function formatDateTime(date) {
+            return date.getFullYear() + '-' + 
+                   String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+                   String(date.getDate()).padStart(2, '0') + '_' + 
+                   String(date.getHours()).padStart(2, '0') + '-' + 
+                   String(date.getMinutes()).padStart(2, '0') + '-' + 
+                   String(date.getSeconds()).padStart(2, '0');
+        }
+
+        function formatTime(dateStr) {
+            var date = new Date(dateStr);
+            return String(date.getHours()).padStart(2, '0') + ':' + String(date.getMinutes()).padStart(2, '0');
+        }
+    </script>
+</body>
+</html>

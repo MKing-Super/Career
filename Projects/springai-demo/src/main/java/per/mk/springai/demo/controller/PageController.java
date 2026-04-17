@@ -7,12 +7,22 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class PageController {
 
     /**
-     * 返回聊天页面
+     * AI 助手页面
      *
      * @return 视图名称
      */
     @GetMapping({"/", "/ai", "/ai/"})
     public String index() {
         return "index";
+    }
+
+    /**
+     * 天气助手页面
+     *
+     * @return 视图名称
+     */
+    @GetMapping({"/weather", "/weather/"})
+    public String weather() {
+        return "weather";
     }
 }
