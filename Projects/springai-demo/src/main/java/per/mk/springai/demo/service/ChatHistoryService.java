@@ -16,7 +16,6 @@ import per.mk.springai.demo.mapper.ChatSessionMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +25,12 @@ public class ChatHistoryService {
     private final ChatSessionMapper sessionMapper;
     private final ChatMessageMapper messageMapper;
 
+    /**
+     * 创建新会话
+     *
+     * @param name 会话名称，如果为空则使用默认名称"新会话"
+     * @return 创建的会话对象
+     */
     public ChatSession createSession(String name) {
         ChatSession session = new ChatSession();
         session.setSessionId(UUID.randomUUID().toString().replace("-", ""));
@@ -34,6 +39,11 @@ public class ChatHistoryService {
         return session;
     }
 
+    /**
+     * 获取所有未删除的会话列表
+     *
+     * @return 会话列表，按修改时间倒序排列
+     */
     public List<ChatSession> getActiveSessions() {
         LambdaQueryWrapper<ChatSession> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(ChatSession::getIsDeleted, 0)
@@ -41,6 +51,12 @@ public class ChatHistoryService {
         return sessionMapper.selectList(wrapper);
     }
 
+    /**
+     * 根据会话ID获取会话信息
+     *
+     * @param sessionId 会话唯一标识
+     * @return 会话对象，如果不存在返回null
+     */
     public ChatSession getSessionById(String sessionId) {
         LambdaQueryWrapper<ChatSession> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(ChatSession::getIsDeleted, 0)
@@ -48,6 +64,12 @@ public class ChatHistoryService {
         return sessionMapper.selectOne(wrapper);
     }
 
+    /**
+     * 更新会话名称
+     *
+     * @param sessionId 会话唯一标识
+     * @param name      新的会话名称
+     */
     public void updateSessionName(String sessionId, String name) {
         LambdaUpdateWrapper<ChatSession> wrapper = new LambdaUpdateWrapper<>();
         wrapper.eq(ChatSession::getSessionId, sessionId)
@@ -55,6 +77,11 @@ public class ChatHistoryService {
         sessionMapper.update(null, wrapper);
     }
 
+    /**
+     * 逻辑删除会话
+     *
+     * @param sessionId 会话唯一标识
+     */
     public void deleteSession(String sessionId) {
         LambdaUpdateWrapper<ChatSession> wrapper = new LambdaUpdateWrapper<>();
         wrapper.eq(ChatSession::getSessionId, sessionId)
@@ -62,6 +89,13 @@ public class ChatHistoryService {
         sessionMapper.update(null, wrapper);
     }
 
+    /**
+     * 保存聊天消息到数据库
+     *
+     * @param sessionId 会话唯一标识
+     * @param role      消息角色 (user/assistant)
+     * @param content   消息内容
+     */
     public void saveMessage(String sessionId, String role, String content) {
         ChatSession session = getSessionById(sessionId);
         if (session == null) {
@@ -77,6 +111,13 @@ public class ChatHistoryService {
         log.info("保存消息: sessionId={}, role={}, content={}", sessionId, role, content);
     }
 
+    /**
+     * 获取会话的历史消息（用于发送给AI）
+     *
+     * @param sessionId 会话唯一标识
+     * @param limit     返回的消息数量限制
+     * @return 消息列表，按时间正序排列
+     */
     public List<Message> getMessagesForSession(String sessionId, int limit) {
         LambdaQueryWrapper<ChatMessage> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(ChatMessage::getSessionId, sessionId)
@@ -96,6 +137,13 @@ public class ChatHistoryService {
         return result;
     }
 
+    /**
+     * 获取会话最近的N条消息（用于前端展示）
+     *
+     * @param sessionId 会话唯一标识
+     * @param limit     返回的消息数量限制
+     * @return 消息列表，按时间正序排列
+     */
     public List<ChatMessage> getRecentMessages(String sessionId, int limit) {
         LambdaQueryWrapper<ChatMessage> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(ChatMessage::getSessionId, sessionId)

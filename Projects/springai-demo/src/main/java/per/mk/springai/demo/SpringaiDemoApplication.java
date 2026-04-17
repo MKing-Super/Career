@@ -10,6 +10,9 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.Enumeration;
 
+/**
+ * Spring AI Demo 应用启动类
+ */
 @SpringBootApplication
 @Slf4j
 public class SpringaiDemoApplication {
@@ -21,6 +24,9 @@ public class SpringaiDemoApplication {
         SpringApplication.run(SpringaiDemoApplication.class, args);
     }
 
+    /**
+     * 应用启动后打印访问地址
+     */
     @PostConstruct
     public void logStartup() {
         String host = getLocalIp();
@@ -29,6 +35,12 @@ public class SpringaiDemoApplication {
         log.info("========================================");
     }
 
+    /**
+     * 获取本机局域网IP
+     * 排除 loopback、VirtualBox 等虚拟网卡
+     *
+     * @return 本机IP地址
+     */
     private String getLocalIp() {
         try {
             for (Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces(); interfaces.hasMoreElements(); ) {

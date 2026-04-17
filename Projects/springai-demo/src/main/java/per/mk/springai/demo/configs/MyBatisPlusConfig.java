@@ -6,15 +6,25 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
+/**
+ * MyBatis Plus 自动填充配置
+ * 用于自动填充创建时间和修改时间字段
+ */
 @Component
 public class MyBatisPlusConfig implements MetaObjectHandler {
 
+    /**
+     * 插入时自动填充
+     */
     @Override
     public void insertFill(MetaObject metaObject) {
         this.strictInsertFill(metaObject, "createTime", LocalDateTime.class, LocalDateTime.now());
         this.strictInsertFill(metaObject, "updateTime", LocalDateTime.class, LocalDateTime.now());
     }
 
+    /**
+     * 更新时自动填充
+     */
     @Override
     public void updateFill(MetaObject metaObject) {
         this.strictUpdateFill(metaObject, "updateTime", LocalDateTime.class, LocalDateTime.now());
