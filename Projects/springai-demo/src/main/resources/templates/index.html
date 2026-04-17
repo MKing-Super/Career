@@ -3,16 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat Demo</title>
+    <title>AI Chat</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script>
-        console.log('marked type:', typeof marked);
-    </script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0c0c0c; color: #fff; height: 100vh; display: flex; flex-direction: column; padding: 20px; }
-        .chat-messages { flex: 1; overflow-y: auto; border: 1px solid #333; border-radius: 8px; padding: 20px; max-width: 900px; width: 100%; margin: 0 auto; }
-        .input-container { padding-top: 20px; flex-shrink: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0c0c0c; color: #fff; height: 100vh; display: flex; }
+        
+        .sidebar { width: 280px; background: #1a1a1a; border-right: 1px solid #333; display: flex; flex-direction: column; flex-shrink: 0; }
+        .sidebar-header { padding: 20px; border-bottom: 1px solid #333; }
+        .new-chat-btn { width: 100%; background: #543add; border: none; color: #fff; padding: 12px; border-radius: 8px; cursor: pointer; font-size: 14px; }
+        .new-chat-btn:hover { background: #6b5ae9; }
+        
+        .session-list { flex: 1; overflow-y: auto; padding: 10px; }
+        .session-item { padding: 12px; border-radius: 8px; cursor: pointer; margin-bottom: 4px; display: flex; align-items: center; justify-content: space-between; }
+        .session-item:hover { background: #2a2a2a; }
+        .session-item.active { background: #333; }
+        .session-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; }
+        .session-actions { display: none; gap: 4px; }
+        .session-item:hover .session-actions { display: flex; }
+        .session-action-btn { background: none; border: none; color: #888; cursor: pointer; padding: 4px; font-size: 12px; }
+        .session-action-btn:hover { color: #fff; }
+        .session-action-btn.delete:hover { color: #ff4444; }
+        
+        .main-content { flex: 1; display: flex; flex-direction: column; }
+        
+        .chat-header { padding: 16px 20px; border-bottom: 1px solid #333; display: flex; align-items: center; justify-content: space-between; }
+        .chat-title { font-size: 16px; font-weight: 500; }
+        .current-session-name { color: #888; font-size: 14px; }
+        
+        .chat-messages { flex: 1; overflow-y: auto; padding: 20px; max-width: 900px; width: 100%; margin: 0 auto; }
         .message { margin-bottom: 20px; display: flex; gap: 16px; }
         .message.user { justify-content: flex-end; }
         .message-avatar { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
@@ -30,6 +49,7 @@
         .message-content pre code { background: none; padding: 0; }
         .message-content ul, .message-content ol { padding-left: 20px; margin: 12px 0; }
         .message-content hr { border: none; border-top: 1px solid #333; margin: 16px 0; }
+        
         .input-container { padding: 20px 40px 30px; border-top: 1px solid #2e2e2e; }
         .input-wrapper { background: #2e2e2e; border-radius: 12px; padding: 12px 16px; display: flex; gap: 12px; align-items: flex-end; max-width: 900px; margin: 0 auto; width: 100%; }
         .input-wrapper textarea { flex: 1; background: none; border: none; color: #fff; font-size: 15px; resize: none; outline: none; font-family: inherit; max-height: 200px; line-height: 1.5; }
@@ -37,36 +57,187 @@
         .send-btn { background: #543add; border: none; color: #fff; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; }
         .send-btn:hover { background: #6b5ae9; }
         .send-btn:disabled { background: #444; cursor: not-allowed; }
+        
         .welcome { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
         .welcome h1 { font-size: 36px; font-weight: 500; margin-bottom: 16px; }
         .welcome p { color: #888; font-size: 15px; }
+        
+        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); align-items: center; justify-content: center; z-index: 1000; }
+        .modal.show { display: flex; }
+        .modal-content { background: #1a1a1a; padding: 24px; border-radius: 12px; width: 400px; }
+        .modal-title { font-size: 18px; margin-bottom: 16px; }
+        .modal-input { width: 100%; background: #333; border: 1px solid #444; color: #fff; padding: 12px; border-radius: 8px; font-size: 14px; margin-bottom: 16px; }
+        .modal-buttons { display: flex; gap: 12px; justify-content: flex-end; }
+        .modal-btn { padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; font-size: 14px; }
+        .modal-btn.cancel { background: #333; color: #fff; }
+        .modal-btn.confirm { background: #543add; color: #fff; }
+        
+        .time-badge { font-size: 11px; color: #666; margin-left: 8px; }
     </style>
 </head>
-<body onload="initChat()">
-    <div class="chat-messages" id="messages">
-        <div class="welcome">
-            <h1>你好，我是 AI 助手</h1>
-            <p>有什么我可以帮助你的吗？</p>
+<body onload="init()">
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <button class="new-chat-btn" onclick="createNewSession()">+ 新建会话</button>
+        </div>
+        <div class="session-list" id="sessionList"></div>
+    </div>
+    
+    <div class="main-content">
+        <div class="chat-header">
+            <div>
+                <div class="chat-title">AI 助手</div>
+                <div class="current-session-name" id="currentSessionName">新会话</div>
+            </div>
+        </div>
+        
+        <div class="chat-messages" id="messages">
+            <div class="welcome">
+                <h1>你好，我是 AI 助手</h1>
+                <p>有什么我可以帮助你的吗？</p>
+            </div>
+        </div>
+        
+        <div class="input-container">
+            <div class="input-wrapper">
+                <textarea id="prompt" placeholder="发送消息..." rows="1" onkeydown="handleKey(event)"></textarea>
+                <button class="send-btn" onclick="send()">发送</button>
+            </div>
         </div>
     </div>
     
-    <div class="input-container">
-        <div class="input-wrapper">
-            <textarea id="prompt" placeholder="发送消息..." rows="1" onkeydown="handleKey(event)"></textarea>
-            <button class="send-btn" onclick="send()">发送</button>
+    <div class="modal" id="renameModal">
+        <div class="modal-content">
+            <div class="modal-title">重命名会话</div>
+            <input type="text" class="modal-input" id="newSessionName" placeholder="输入会话名称">
+            <div class="modal-buttons">
+                <button class="modal-btn cancel" onclick="closeRenameModal()">取消</button>
+                <button class="modal-btn confirm" onclick="confirmRename()">确定</button>
+            </div>
         </div>
     </div>
 
     <script>
-        let chatHistory = [];
-        let chatId = '';
+        let currentSessionId = '';
+        let renameTargetId = '';
 
-        async function initChat() {
+        async function init() {
+            await loadSessions();
+        }
+
+        async function loadSessions() {
             try {
-                const res = await fetch('/ai/new');
-                chatId = await res.text();
+                const res = await fetch('/ai/sessions');
+                const sessions = await res.json();
+                const list = document.getElementById('sessionList');
+                list.innerHTML = '';
+                sessions.forEach(session => {
+                    const item = document.createElement('div');
+                    item.className = 'session-item' + (session.sessionId === currentSessionId ? ' active' : '');
+                    item.innerHTML = `
+                        <span class="session-name" onclick="selectSession('${session.sessionId}')">${session.sessionName}</span>
+                        <div class="session-actions">
+                            <button class="session-action-btn" onclick="openRenameModal('${session.sessionId}', '${session.sessionName}')" title="重命名">✎</button>
+                            <button class="session-action-btn delete" onclick="deleteSession('${session.sessionId}')" title="删除">✕</button>
+                        </div>
+                    `;
+                    list.appendChild(item);
+                });
             } catch (err) {
-                console.error('初始化会话失败', err);
+                console.error('加载会话列表失败', err);
+            }
+        }
+
+        async function createNewSession() {
+            try {
+                const res = await fetch('/ai/session', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: '{}' });
+                const data = await res.json();
+                currentSessionId = data.sessionId;
+                document.getElementById('currentSessionName').textContent = data.sessionName;
+                document.getElementById('messages').innerHTML = '<div class="welcome"><h1>你好，我是 AI 助手</h1><p>有什么我可以帮助你的吗？</p></div>';
+                await loadSessions();
+            } catch (err) {
+                console.error('创建会话失败', err);
+            }
+        }
+
+        async function selectSession(sessionId) {
+            currentSessionId = sessionId;
+            await loadSessions();
+            
+            try {
+                const res = await fetch('/ai/session/' + sessionId + '/messages');
+                const messages = await res.json();
+                
+                const messagesDiv = document.getElementById('messages');
+                messagesDiv.innerHTML = '';
+                
+                if (messages.length === 0) {
+                    messagesDiv.innerHTML = '<div class="welcome"><h1>你好，我是 AI 助手</h1><p>有什么我可以帮助你的吗？</p></div>';
+                } else {
+                    messages.forEach(msg => {
+                        addMessage(msg.role, msg.content, msg.createTime);
+                    });
+                    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                }
+                
+                const sessionRes = await fetch('/ai/sessions');
+                const sessions = await sessionRes.json();
+                const session = sessions.find(s => s.sessionId === sessionId);
+                if (session) {
+                    document.getElementById('currentSessionName').textContent = session.sessionName;
+                }
+            } catch (err) {
+                console.error('加载消息失败', err);
+            }
+        }
+
+        function openRenameModal(sessionId, currentName) {
+            event.stopPropagation();
+            renameTargetId = sessionId;
+            document.getElementById('newSessionName').value = currentName;
+            document.getElementById('renameModal').classList.add('show');
+        }
+
+        function closeRenameModal() {
+            document.getElementById('renameModal').classList.remove('show');
+        }
+
+        async function confirmRename() {
+            const newName = document.getElementById('newSessionName').value.trim();
+            if (!newName) return;
+            
+            try {
+                await fetch('/ai/session/' + renameTargetId, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ name: newName })
+                });
+                closeRenameModal();
+                await loadSessions();
+                
+                if (currentSessionId === renameTargetId) {
+                    document.getElementById('currentSessionName').textContent = newName;
+                }
+            } catch (err) {
+                console.error('重命名失败', err);
+            }
+        }
+
+        async function deleteSession(sessionId) {
+            event.stopPropagation();
+            if (!confirm('确定要删除该会话吗？')) return;
+            
+            try {
+                await fetch('/ai/session/' + sessionId, { method: 'DELETE' });
+                if (currentSessionId === sessionId) {
+                    currentSessionId = '';
+                    document.getElementById('currentSessionName').textContent = '新会话';
+                    document.getElementById('messages').innerHTML = '<div class="welcome"><h1>你好，我是 AI 助手</h1><p>有什么我可以帮助你的吗？</p></div>';
+                }
+                await loadSessions();
+            } catch (err) {
+                console.error('删除失败', err);
             }
         }
 
@@ -81,18 +252,21 @@
             const prompt = document.getElementById('prompt').value.trim();
             if (!prompt) return;
             
+            if (!currentSessionId) {
+                await createNewSession();
+            }
+            
             const sendBtn = document.querySelector('.send-btn');
             sendBtn.disabled = true;
             
             addMessage('user', prompt);
-            chatHistory.push({ role: 'user', content: prompt });
             document.getElementById('prompt').value = '';
             
             const aiMessage = addMessage('ai', '');
             const contentDiv = aiMessage.querySelector('.message-content');
             
             try {
-                const res = await fetch('/ai/chat?prompt=' + encodeURIComponent(prompt) + '&chatId=' + chatId);
+                const res = await fetch('/ai/chat?prompt=' + encodeURIComponent(prompt) + '&sessionId=' + currentSessionId);
                 const reader = res.body.getReader();
                 const decoder = new TextDecoder();
                 let fullText = '';
@@ -109,12 +283,8 @@
                     }
                     messages.scrollTop = messages.scrollHeight;
                 }
-                if (typeof marked !== 'undefined') {
-                    contentDiv.innerHTML = marked.parse(fullText);
-                } else {
-                    contentDiv.textContent = fullText;
-                }
-                chatHistory.push({ role: 'ai', content: fullText });
+                
+                await loadSessions();
             } catch (err) {
                 contentDiv.innerHTML = '<p style="color: #ff4444;">请求出错，请重试</p>';
             }
@@ -122,23 +292,31 @@
             sendBtn.disabled = false;
         }
 
-        function addMessage(role, content) {
+        function addMessage(role, content, createTime) {
             const messages = document.getElementById('messages');
             const welcome = messages.querySelector('.welcome');
             if (welcome) welcome.remove();
             
             const div = document.createElement('div');
             div.className = 'message ' + role;
+            
             let html = '';
-            if (typeof marked !== 'undefined') {
-                html = marked.parse(content || '');
+            if (typeof marked !== 'undefined' && content) {
+                html = marked.parse(content);
             } else {
                 html = content || '';
             }
-            div.innerHTML = '<div class="message-avatar">' + (role === 'user' ? 'U' : 'AI') + '</div><div class="message-content">' + html + '</div>';
+            
+            const timeHtml = createTime ? `<span class="time-badge">${formatTime(createTime)}</span>` : '';
+            div.innerHTML = '<div class="message-avatar">' + (role === 'user' ? 'U' : 'AI') + '</div><div class="message-content">' + html + timeHtml + '</div>';
             messages.appendChild(div);
             messages.scrollTop = messages.scrollHeight;
             return div;
+        }
+
+        function formatTime(dateStr) {
+            const date = new Date(dateStr);
+            return date.getHours().toString().padStart(2, '0') + ':' + date.getMinutes().toString().padStart(2, '0');
         }
     </script>
 </body>
