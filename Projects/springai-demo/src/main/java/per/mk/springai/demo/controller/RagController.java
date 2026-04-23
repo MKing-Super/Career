@@ -68,7 +68,7 @@ public class RagController {
             String content = new String(file.getBytes(), StandardCharsets.UTF_8);
             String filename = file.getOriginalFilename();
 
-            log.info("[阿坤] 上传文件: {}, 大小: {} bytes", filename, content.length());
+            log.info(" 上传文件: {}, 大小: {} bytes", filename, content.length());
 
             List<org.springframework.ai.document.Document> documents = new ArrayList<>();
             List<String> chunks = chunkText(content, 500);
@@ -86,14 +86,14 @@ public class RagController {
 
             vectorStore.add(documents);
 
-            log.info("[阿坤] 已成功导入 {} 个文档块到向量库", documents.size());
+            log.info(" 已成功导入 {} 个文档块到向量库", documents.size());
             return "成功导入 " + documents.size() + " 个文档块";
 
         } catch (IOException e) {
-            log.error("[阿坤] 读取文件失败", e);
+            log.error(" 读取文件失败", e);
             return "读取文件失败: " + e.getMessage();
         } catch (Exception e) {
-            log.error("[阿坤] 导入向量库失败", e);
+            log.error(" 导入向量库失败", e);
             return "导入失败: " + e.getMessage();
         }
     }
@@ -110,7 +110,7 @@ public class RagController {
     @ResponseBody
     public String chatStream(@RequestParam("prompt") String prompt,
                             @RequestParam(value = "sessionId", required = false) String sessionId) {
-        log.info("[阿坤] 提问: {}", prompt);
+        log.info(" 提问: {}", prompt);
 
         String session = (sessionId != null && !sessionId.isEmpty()) ? sessionId : "default";
         StringBuilder fullResponse = new StringBuilder();
@@ -122,8 +122,8 @@ public class RagController {
                 .stream()
                 .content()
                 .doOnNext(fullResponse::append)
-                .doOnComplete(() -> log.info("[阿坤] 回答: {}", fullResponse))
-                .doOnError(e -> log.error("[阿坤] 对话失败", e))
+                .doOnComplete(() -> log.info(" 回答: {}", fullResponse))
+                .doOnError(e -> log.error(" 对话失败", e))
                 .collectList()
                 .block();
 
@@ -147,10 +147,10 @@ public class RagController {
     public String clearVectorStore() {
         try {
             vectorStore.delete("SELECT * FROM vector_docs");
-            log.info("[阿坤] 已清空向量库");
+            log.info(" 已清空向量库");
             return "已清空向量库";
         } catch (Exception e) {
-            log.error("[阿坤] 清空向量库失败", e);
+            log.error(" 清空向量库失败", e);
             return "清空失败: " + e.getMessage();
         }
     }
@@ -164,7 +164,7 @@ public class RagController {
     @ResponseBody
     public String clearMemory(@RequestParam("sessionId") String sessionId) {
         chatMemory.clear(sessionId);
-        log.info("[阿坤] 已清空会话记忆: {}", sessionId);
+        log.info(" 已清空会话记忆: {}", sessionId);
         return "已清空会话: " + sessionId;
     }
 

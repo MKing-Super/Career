@@ -35,7 +35,8 @@ spring:
 
 logging:
   level:
-    org.springframework.ai: debug
+    root: INFO
+    org.springframework.ai: INFO
 
 server:
   port: 8090
