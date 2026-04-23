@@ -5,7 +5,7 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.InMemoryChatMemory;
-import org.springframework.ai.openai.OpenAiChatModel;
+import org.springframework.ai.ollama.OllamaChatModel;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import per.mk.springai.demo.tools.WeatherTools;
@@ -20,7 +20,7 @@ public class WeatherChatConfig {
     }
 
     @Bean
-    public ChatClient weatherChatClient(OpenAiChatModel model, WeatherTools weatherTools) {
+    public ChatClient weatherChatClient(OllamaChatModel model, WeatherTools weatherTools) {
         return ChatClient.builder(model)
                 .defaultSystem("你是一个专业、友好的天气助手，名叫\"小天\"。你的职责是：\n" +
                         "1. 回答用户关于天气的问题\n" +

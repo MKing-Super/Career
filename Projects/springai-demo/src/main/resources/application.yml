@@ -2,19 +2,31 @@ spring:
   application:
     name: springai-demo
   ai:
-    openai:
-      base-url: https://opencode.ai/zen
-      api-key: ${OPENAI_API_KEY}
+    model:
+      chat: ollama
+      embedding: ollama
+    ollama:
+      base-url: http://localhost:11434
       chat:
         options:
-          model: big-pickle
+          model: qwen2.5:0.5b
           temperature: 0.8
+      embedding:
+        options:
+          model: nomic-embed-text
+    vectorstore:
+      elasticsearch:
+        initialize-schema: true
+        dimensions: 768
+        index-name: mk-rag-test-index
+
+  elasticsearch:
+    uris: http://localhost:9200
   servlet:
     encoding:
       charset: UTF-8
       enabled: true
       force: true
-
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/work?useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
@@ -24,7 +36,6 @@ spring:
 logging:
   level:
     org.springframework.ai: debug
-    per.mk.springai.demo: debug
 
 server:
   port: 8090

@@ -3,10 +3,19 @@
 ## Project Overview
 
 This repository contains Java projects:
-- **springcloud-demo**: Spring Cloud microservices demo (Java 8, Spring Boot 2.3.12.RELEASE, Spring Cloud Hoxton.SR12)
-- **netty-demo**: Netty WebSocket server/client demo (Java 8, Netty 4.1.23.Final)
+- **springai-demo**: Spring Boot 3.4.5 + Spring AI chat app (Java 17, MySQL, Thymeleaf) - in `Projects/springai-demo/`
+- **springcloud-demo**: Spring Cloud microservices demo (Java 8, Spring Boot 2.3.12.RELEASE) - in `Projects/springcloud-demo/`
+- **netty-demo**: Netty WebSocket server/client demo (Java 8, Netty 4.1.23.Final) - in `Projects/netty-demo/`
 
 ## Build Commands
+
+### Spring AI Demo
+```bash
+cd Projects/springai-demo
+mvn clean package -DskipTests    # Build
+java -jar target/springai-demo-3.4.5.jar --spring.ai.openai.api-key=xxx  # Run
+# Or: mvn spring-boot:run
+```
 
 ### Spring Cloud Demo
 ```bash
@@ -146,10 +155,11 @@ mvn clean install -DskipTests
 ```
 
 ## Notes
-- No dedicated test framework configuration detected - add JUnit 5/4 to pom.xml for tests
+- No dedicated test framework configuration detected in springcloud-demo - add JUnit 5/4 to pom.xml for tests
 - Configuration via `application.yml` in resources directory
 - MyBatis mapper XML files in `src/main/resources/mapper/`
 - HTML templates in `src/main/resources/templates/`
+- Database required: MySQL 3306 for springai-demo, schema in `springai-demo/src/test/java/per/mk/springai/demo/database_schema.sql`
 
 ## Git Workflow
 - After creating new files, always add them to git staging: `git add <file-paths>`
